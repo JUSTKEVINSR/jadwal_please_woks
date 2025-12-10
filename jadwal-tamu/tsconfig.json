@@ -14,10 +14,14 @@
     "strict": false,
     "noEmit": true,
 
+    
+
     "types": [
       "@types/react",
       "@types/react-dom"
     ],
+
+    
 
     "baseUrl": ".",
     "paths": {
@@ -29,7 +33,10 @@
   "include": [
     "resources/js/**/*",
     "resources/js/**/*.tsx",
-    "resources/js/types/**/*.d.ts"
+    "resources/js/types/**/*.d.ts",
+    "resources/js/**/*.ts" 
+    
+    
   ],
 
   "exclude": ["node_modules"]

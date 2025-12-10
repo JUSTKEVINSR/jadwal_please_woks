@@ -619,6 +619,24 @@ const handleSubmit = (e: React.FormEvent) => {
                                         placeholder="Masukkan lokasi rapat"
                                     />
                                 </div>
+
+                                    {/* Lokasi Select Dropdown */}
+                                    <div className="col-span-3">
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi</label>
+                                        <select
+                                            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
+                                            id="role"
+                                            name="role"
+                                            //value={formData.role}
+                                            //onChange={handleChange}
+                                            required
+                                        >
+                                            <option value=" ">Ruang 1</option>
+                                            <option value=" ">Ruang 2</option>
+                                            <option value=" ">Ruang 3</option>
+                                        </select>
+                                    </div>
+
                             </div>
 
                             {/* tombol */}

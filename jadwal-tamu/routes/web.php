@@ -1,13 +1,17 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+
 use App\Http\Controllers\JadwalRapatController;
 use App\Http\Controllers\DaftarTamuController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+
 use Inertia\Inertia;
 
 // ✅ Halaman utama menampilkan jadwal & video
@@ -48,4 +52,36 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
+//BUAT BIKIN AKUN USER BARU DI BAWAH
+
+// User Management Routes (accessible to any authenticated user)
+Route::resource('users', UserController::class)->middleware(['auth', 'verified']);
+
+// UserPlus routes accessible to any authenticated user
+Route::get('/users_plus', [UserController::class, 'index'])->name('users_plus.index')->middleware(['auth', 'verified']);
+Route::get('/users_plus/create', [UserController::class, 'create'])->name('users_plus.create')->middleware(['auth', 'verified']);
+Route::post('/users_plus', [UserController::class, 'storePlus'])->name('users_plus.store')->middleware(['auth', 'verified']);
+
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    // UserPlus routes accessible to any authenticated user
+    Route::put('/users_plus/{userPlus}', [UserController::class, 'updatePlus'])->name('users_plus.update');
+    Route::delete('/users_plus/{userPlus}', [UserController::class, 'destroyPlus'])->name('users_plus.destroy');
+
+    // If you need other admin routes that are NOT part of the standard resource, add them here:
+    // Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+});
+
+// Standard Laravel Breeze routes (Profile, Dashboard, etc.)
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// The authentication routes from Breeze
 require __DIR__.'/auth.php';
+
+

@@ -8,6 +8,8 @@ export interface User {
     two_factor_enabled?: boolean;
     profile_photo_url?: string;
     remember_token?: string;
+    role: string; 
+
 }
 export interface NavItem {
     title: string;

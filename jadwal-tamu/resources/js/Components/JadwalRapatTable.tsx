@@ -14,9 +14,10 @@ interface Props {
   jadwal: JadwalItem[];
   onPageChange?: (current: number, total: number) => void;
   deviceType?: 'mobile' | 'desktop' | 'tv-small' | 'tv-large';
+  visibleLimit?: number; // optional: limit how many rows to render (e.g., top 5)
 }
 
-const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 'desktop' }) => {
+  const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 'desktop', visibleLimit }) => {
   // ✅ Sesuaikan rows per page berdasarkan device
   const getMaxRows = () => {
     if (deviceType === 'mobile') return 20; // Mobile bisa scroll, tampilkan semua
@@ -136,6 +137,24 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
       })
     : pages[page] || [];
 
+
+  // Show only N rows at a time, auto-rotate every 10 seconds
+  const VISIBLE_LIMIT = typeof visibleLimit === 'number' ? visibleLimit : 6;
+  const [visibleGroup, setVisibleGroup] = useState(0);
+  const totalGroups = Math.ceil(flatRows.length / VISIBLE_LIMIT);
+
+  useEffect(() => {
+    if (flatRows.length <= VISIBLE_LIMIT) return;
+    const timer = setInterval(() => {
+      setVisibleGroup((prev) => (prev + 1) % totalGroups);
+    }, 10000);
+    return () => clearInterval(timer);
+  }, [flatRows.length, VISIBLE_LIMIT, totalGroups]);
+
+  // Compute which rows to show for this group
+  const startIdx = visibleGroup * VISIBLE_LIMIT;
+  const rowsToRender = flatRows.slice(startIdx, startIdx + VISIBLE_LIMIT);
+
   // Component untuk teks berjalan
   const ScrollingText: React.FC<{ text: string; maxLength?: number }> = ({ 
     text, 
@@ -237,7 +256,7 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
         <thead className={getTVTextSize("bg-[#0B3D91] text-white text-sm md:text-base")}>
           <tr>
             <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-no p-1' : 'p-1.5 md:p-2 w-[40px] md:w-[50px]'}`}>No</th>
-            <th className={`border ${deviceType === 'mobile' ? 'mobile-col-tanggal p-1' : 'p-1.5 md:p-2 w-[160px] md:w-[200px]'}`}>Tanggal</th>
+            {/* <th className={`border ${deviceType === 'mobile' ? 'mobile-col-tanggal p-1' : 'p-1.5 md:p-2 w-[160px] md:w-[200px]'}`}>Tanggal</th> */}
             <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-pukul p-1' : 'p-1.5 md:p-2 w-[110px] md:w-[130px]'}`}>Pukul</th>
             <th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2'}`}>Judul</th>
             <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-lokasi p-1' : 'p-1.5 md:p-2 w-[90px] md:w-[110px]'}`}>Lokasi</th>
@@ -247,8 +266,9 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
         </thead>
 
         <tbody>
-          {displayRows.map((row, idx) => {
-            const no = Object.keys(allGrouped).indexOf(row.tanggal) + 1;
+          {rowsToRender.map((row, idx) => {
+            // Sequential numbering: global index in flatRows
+            const no = startIdx + idx + 1;
             
             // ✅ Fixed height untuk setiap row
             const rowHeight = deviceType === 'mobile' ? '50px' : deviceType === 'tv-small' ? '55px' : deviceType === 'tv-large' ? '60px' : '55px';
@@ -259,8 +279,9 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
                 className="hover:bg-gray-50"
                 style={{ height: rowHeight }}
               >
+                <td>{no}</td>
 
-                {row.isFirstOfDate && (
+                {/* {row.isFirstOfDate && (
                   <>
                     <td
                       rowSpan={row.tanggalCountInPage}
@@ -291,7 +312,7 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
                       }
                     </td>
                   </>
-                )}
+                )} */}
 
                 <td className={`border text-center font-semibold text-[#002D62] whitespace-nowrap ${
                   deviceType === 'mobile' ? 'p-1 text-[9px]' : 'p-1.5 md:p-2 text-[10px] md:text-xs'

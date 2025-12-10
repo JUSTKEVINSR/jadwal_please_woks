@@ -5,17 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; // ← WAJIB
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class UserPlus extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable; // ← WAJIB
+    use HasApiTokens, HasFactory, Notifiable;
+
+    protected $table = 'users_plus';
 
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
+        'role_code',
     ];
 
     protected $hidden = [
@@ -33,6 +35,13 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        $isAdmin = $this->role_code === 1945;
+        \Log::info('UserPlus::isAdmin check', [
+            'user_id' => $this->id,
+            'role_code' => $this->role_code,
+            'role_code_type' => gettype($this->role_code),
+            'is_admin' => $isAdmin,
+        ]);
+        return $isAdmin;
     }
 }

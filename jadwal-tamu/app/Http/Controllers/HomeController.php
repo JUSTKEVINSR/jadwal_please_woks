@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\JadwalRapat;
+use Carbon\Carbon;
+
 use App\Models\Video;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\URL;
@@ -14,6 +16,8 @@ class HomeController extends Controller
         $jadwal = JadwalRapat::where('status', '!=', 'Selesai')
             ->orderBy('tanggal', 'asc')
             ->orderBy('jam_mulai', 'asc')
+            ->whereDate('tanggal', Carbon::today())
+            
             ->get();
 
         // ✅ Ambil video aktif

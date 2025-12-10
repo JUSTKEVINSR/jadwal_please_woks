@@ -198,7 +198,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                     INSPEKTORAT JENDERAL
                                 </h1>
                                 <p className="text-blue-200 text-xs md:text-sm font-medium">
-                                    Kementerian Dalam Negeri RI
+                                    Kementerian Dalam Negeri RI edos
                                 </p>
                             </div>
                         </div>
@@ -283,6 +283,8 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                   text-center text-lg md:text-2xl font-bold py-3 md:py-4 rounded-xl shadow-lg mb-3 md:mb-4"
                             >
                                 JADWAL KEGIATAN HARI INI
+
+                            
                             </div>
 
                             {/* Tabel */}
