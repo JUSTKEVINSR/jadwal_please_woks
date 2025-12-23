@@ -9,7 +9,7 @@ interface UserDataPayload {
     name: string;
     email: string;
     password: string;
-    role: 'user' | 'admin';
+    role: 'user' | 'admin' | 'ula' | 'kasubak';
 }
 
 const UserManagementPage = () => {

@@ -12,19 +12,40 @@ class RoleMasterSeeder extends Seeder
      */
     public function run(): void
     {
-        \DB::table('role_master')->insert([
+        \DB::table('role_master')->updateOrInsert(
+            ['role_code' => 1945],
             [
                 'name' => 'Admin',
-                'role_code' => 1945,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
+            ]
+        );
+        
+        \DB::table('role_master')->updateOrInsert(
+            ['role_code' => 1969],
             [
                 'name' => 'User',
-                'role_code' => 1969,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-        ]);
+            ]
+        );
+        
+        \DB::table('role_master')->updateOrInsert(
+            ['role_code' => 8008],
+            [
+                'name' => 'ula',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+        
+        \DB::table('role_master')->updateOrInsert(
+            ['role_code' => 880],
+            [
+                'name' => 'kasubak',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }

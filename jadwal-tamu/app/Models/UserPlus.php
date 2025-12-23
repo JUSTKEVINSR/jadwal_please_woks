@@ -39,7 +39,12 @@ class UserPlus extends Authenticatable
 
     public function getRoleAttribute(): string
     {
-        return $this->role_code === 1945 ? 'admin' : 'user';
+        return match ($this->role_code) {
+            1945 => 'admin',
+            8008 => 'ula',
+            880 => 'kasubak',
+            default => 'user',
+        };
     }
 
     public function isAdmin(): bool

@@ -16,21 +16,23 @@ class RoleMiddleware
      */
     // In app/Http/Middleware/RoleMiddleware.php
 
-public function handle(Request $request, Closure $next, string $role): Response
+public function handle(Request $request, Closure $next, string $roles): Response
 {
     // Ensure you use the fully qualified class name for Auth
-    $user = Auth::user(); 
+    $user = Auth::user();
 
     // 1. Check if the user is authenticated (logged in).
     if (!$user) {
         return redirect()->route('login');
     }
 
-    // 2. Check the user's role against the required role passed from the route.
-    // This assumes your User model has a 'role' column.
-    if ($user->role !== $role) {
+    // 2. Split the roles string into an array of roles.
+    $allowedRoles = explode('|', $roles);
+
+    // 3. Check if the user's role is in the allowed roles.
+    if (!in_array($user->role, $allowedRoles)) {
         // Abort the request with a 403 Forbidden error
-        abort(403, 'Unauthorized action. Required role: ' . $role);
+        abort(403, 'Unauthorized action. Required roles: ' . $roles);
     }
 
     return $next($request);

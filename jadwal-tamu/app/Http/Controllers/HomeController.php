@@ -13,7 +13,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $jadwal = JadwalRapat::where('status', '!=', 'Selesai')
+        $jadwal = JadwalRapat::with('room')->where('status', '!=', 'Selesai')
             ->orderBy('tanggal', 'asc')
             ->orderBy('jam_mulai', 'asc')
             ->whereDate('tanggal', Carbon::today())

@@ -27,6 +27,8 @@ class JadwalRapat extends Model
         'gunakan_zoom',
         'nama_pic',
         'nomor_pic',
+        'kasubak',
+        'ula',
     ];
 
     /**
@@ -46,6 +48,8 @@ class JadwalRapat extends Model
     protected $attributes = [
         'status' => 'Belum',
         'gunakan_zoom' => 'no',
+        'kasubak' => 'pending',
+        'ula' => 'pending',
     ];
 
     /**

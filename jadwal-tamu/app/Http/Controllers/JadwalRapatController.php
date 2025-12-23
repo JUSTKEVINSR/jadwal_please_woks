@@ -26,6 +26,9 @@ class JadwalRapatController extends Controller
             'jadwal' => $jadwalRapat,
             'statusFilter' => $status,
             'rooms' => RoomMaster::all(),
+            'auth' => [
+                'user' => $request->user(),
+            ],
         ]);
     }
 
@@ -42,11 +45,12 @@ class JadwalRapatController extends Controller
             'gunakan_zoom' => 'required|in:yes,no',
             'nama_pic' => 'nullable|string',
             'nomor_pic' => 'nullable|string',
+            'kasubak' => 'required|in:pending,rejected,approve',
         ]);
 
         // Convert 12-hour input to 24-hour format
-        $jam_mulai_24 = Carbon::createFromFormat('h:i A', $validated['jam_mulai'])->format('H:i:s');
-        $jam_selesai_24 = Carbon::createFromFormat('h:i A', $validated['jam_selesai'])->format('H:i:s');
+        $jam_mulai_24 = Carbon::createFromFormat('h:i A', $validated['jam_mulai'])->format('H:i');
+        $jam_selesai_24 = Carbon::createFromFormat('h:i A', $validated['jam_selesai'])->format('H:i');
 
         // Check for existing schedule with same date, times, and location
         $exists = JadwalRapat::where('tanggal', $validated['tanggal'])
@@ -72,7 +76,19 @@ class JadwalRapatController extends Controller
 
     public function update(Request $request, JadwalRapat $jadwalRapat)
     {
-        if ($jadwalRapat->user_id !== auth()->id()) {
+        $user = auth()->user();
+        
+        // Log the user's role and the result of the role check
+        \Log::info('JadwalRapatController@update: User role check', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'jadwal_user_id' => $jadwalRapat->user_id,
+            'is_owner' => $jadwalRapat->user_id === $user->id,
+            'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak']),
+        ]);
+        
+        // Check if the user is the owner or has the required role
+        if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak'])) {
             abort(403);
         }
 
@@ -86,6 +102,26 @@ class JadwalRapatController extends Controller
             return back()->with('message', 'Status jadwal rapat berhasil diperbarui');
         }
 
+        if ($request->has('kasubak') && $request->keys() === ['kasubak']) {
+            $request->validate([
+                'kasubak' => 'required|in:pending,rejected,approve',
+            ]);
+
+            $jadwalRapat->update(['kasubak' => $request->kasubak]);
+
+            return back()->with('message', 'Kasubak jadwal rapat berhasil diperbarui');
+        }
+
+        if ($request->has('ula') && $request->keys() === ['ula']) {
+            $request->validate([
+                'ula' => 'required|in:pending,rejected,approve',
+            ]);
+
+            $jadwalRapat->update(['ula' => $request->ula]);
+
+            return back()->with('message', 'ULA jadwal rapat berhasil diperbarui');
+        }
+
         $validated = $request->validate([
             'tanggal' => 'required|date',
             'jam_mulai' => 'required|date_format:h:i A', // Input is 12-hour format
@@ -97,11 +133,12 @@ class JadwalRapatController extends Controller
             'gunakan_zoom' => 'required|in:yes,no',
             'nama_pic' => 'nullable|string',
             'nomor_pic' => 'nullable|string',
+            'kasubak' => 'required|in:pending,rejected,approve',
         ]);
 
         // Convert 12-hour input to 24-hour format
-        $jam_mulai_24 = Carbon::createFromFormat('h:i A', $validated['jam_mulai'])->format('H:i:s');
-        $jam_selesai_24 = Carbon::createFromFormat('h:i A', $validated['jam_selesai'])->format('H:i:s');
+        $jam_mulai_24 = Carbon::createFromFormat('h:i A', $validated['jam_mulai'])->format('H:i');
+        $jam_selesai_24 = Carbon::createFromFormat('h:i A', $validated['jam_selesai'])->format('H:i');
 
         // Check for existing schedule with same date, times, and location (excluding current record)
         $exists = JadwalRapat::where('tanggal', $validated['tanggal'])
@@ -126,7 +163,19 @@ class JadwalRapatController extends Controller
 
     public function destroy(JadwalRapat $jadwalRapat)
     {
-        if ($jadwalRapat->user_id !== auth()->id()) {
+        $user = auth()->user();
+        
+        // Log the user's role and the result of the role check
+        \Log::info('JadwalRapatController@destroy: User role check', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'jadwal_user_id' => $jadwalRapat->user_id,
+            'is_owner' => $jadwalRapat->user_id === $user->id,
+            'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak']),
+        ]);
+        
+        // Check if the user is the owner or has the required role
+        if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak'])) {
             abort(403);
         }
 

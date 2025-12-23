@@ -12,6 +12,8 @@ interface Jadwal {
     keterangan?: string;
     status: string;
     gunakan_zoom: string;
+    kasubak?: string;
+    ula?: string;
 }
 
 interface Video {
@@ -222,8 +224,8 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                             {/* Jam Digital */}
                             <div
                                 className="bg-gradient-to-br from-[#0B3D91] to-[#1E5BB8] rounded-2xl 
-                  text-white flex flex-col items-center justify-center 
-                  shadow-xl relative overflow-hidden h-[180px] md:flex-1"
+                                            text-white flex flex-col items-center justify-center 
+                                            shadow-xl relative overflow-hidden h-[130px] "
                             >
                                 {/* Dekorasi background */}
                                 <div className="absolute inset-0 opacity-10">
@@ -247,7 +249,56 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                             </div>
 
                             {/* Video Player - DENGAN BORDER BIRU TAPI VIDEO FULL */}
-                            <div className="bg-gradient-to-br from-[#0B3D91] to-[#1E5BB8] rounded-2xl shadow-xl p-1 overflow-hidden h-[180px] md:flex-1">
+                            <div className="bg-gradient-to-br from-[#c4cfe2] to-[#4d8be9] rounded-2xl shadow-xl p-1 overflow-hidden h-[180px] md:flex-1">
+                               {/*  <div className="w-full h-full bg-black rounded-lg overflow-hidden">
+                                    {video && video.url ? (
+                                        <video
+                                            src={video.url}
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gray-900 rounded-lg">
+                                            <div className="text-center">
+                                                <div className="text-3xl md:text-4xl mb-2">
+                                                    📹
+                                                </div>
+                                                <p className="text-white text-base md:text-lg font-semibold">
+                                                    Video Display
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                    )}
+                                </div>*/}
+
+                                {/* Tabel */}
+                            <div className={`rounded-xl bg-blue shadow-inner ${canScroll ? 'overflow-visible' : 'flex-1 overflow-hidden min-h-0'}`}>
+                                <div className={`${canScroll ? 'overflow-visible' : 'h-full overflow-hidden'}`}>
+                                    <JadwalRapatTable
+                                        jadwal={jadwal.filter(item => 
+                                            item.kasubak === 'approve' &&
+                                            item.ula === 'approve'
+
+                                        )}
+                                        onPageChange={handlePageChange}
+                                        deviceType={deviceType}
+                                    />
+                                </div>
+                            </div>
+                            
+                            </div>
+                        </div>
+                        
+
+                        {/* Kolom Kanan: Tabel Jadwal - Background BIRU MUDA */}
+                        <div
+                            className={`flex-1 bg-[#0B3D91] rounded-2xl shadow-xl p-3 md:p-4 flex flex-col border border-[#A0C4FF] ${canScroll ? 'mb-4' : 'min-h-0'}`}
+                        >
+                            <div className="bg-gradient-to-br from-[#072355] to-[#072355] rounded-2xl shadow-xl p-1 overflow-hidden h-[180px] md:flex-1">
                                 <div className="w-full h-full bg-black rounded-lg overflow-hidden">
                                     {video && video.url ? (
                                         <video
@@ -272,23 +323,20 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                     )}
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Kolom Kanan: Tabel Jadwal - Background BIRU MUDA */}
-                        <div
-                            className={`flex-1 bg-[#B0DAFF] rounded-2xl shadow-xl p-3 md:p-4 flex flex-col border border-[#A0C4FF] ${canScroll ? 'mb-4' : 'min-h-0'}`}
-                        >
-                            {/* Header Tabel */}
+
+
+                            {/* Header Tabel 
                             <div
                                 className="table-header bg-gradient-to-r from-[#0B3D91] to-[#1E5BB8] text-white 
-                  text-center text-lg md:text-2xl font-bold py-3 md:py-4 rounded-xl shadow-lg mb-3 md:mb-4"
+                                 text-center text-lg md:text-2xl font-bold py-3 md:py-4 rounded-xl shadow-lg mb-3 md:mb-4"
                             >
                                 JADWAL KEGIATAN HARI INI
 
                             
                             </div>
-
-                            {/* Tabel */}
+*/}
+                            {/* Tabel 
                             <div className={`rounded-xl bg-blue shadow-inner ${canScroll ? 'overflow-visible' : 'flex-1 overflow-hidden min-h-0'}`}>
                                 <div className={`${canScroll ? 'overflow-visible' : 'h-full overflow-hidden'}`}>
                                     <JadwalRapatTable
@@ -298,8 +346,11 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                     />
                                 </div>
                             </div>
+                            */}
 
-                            {/* ✅ Pagination dots - hanya tampil untuk desktop & TV */}
+                            
+
+                            {/* ✅ Pagination dots - hanya tampil untuk desktop & TV 
                             {totalPages > 1 && !canScroll && (
                                 <div className="flex justify-center mt-3 md:mt-4 gap-2">
                                     {Array.from({ length: totalPages }).map(
@@ -316,6 +367,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                     )}
                                 </div>
                             )}
+                            */}
                         </div>
                     </div>{" "}
                     {/* penutup konten utama */}

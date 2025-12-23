@@ -14,26 +14,26 @@ class RoomMasterSeeder extends Seeder
     {
         \DB::table('room_master')->insert([
             [
-                'name' => 'Meeting Room A',
+                'name' => 'Ruang Rapat A',
                 'room_code' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Meeting Room B',
+                'name' => 'Ruang Rapat B',
                 'room_code' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Meeting Room C',
+                'name' => 'Ruang Rapat C',
                 'room_code' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Conference Hall',
-                'room_code' => 10,
+                'name' => 'Aula Utama',
+                'room_code' => 4,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

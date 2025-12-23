@@ -6,6 +6,10 @@ interface JadwalItem {
   jam_selesai: string;
   judul: string;
   lokasi: string;
+  room?: {
+    name: string;
+    room_code: number;
+  };
   keterangan?: string;
   status: string;
   gunakan_zoom: string;
@@ -140,7 +144,7 @@ interface Props {
 
 
   // Show only N rows at a time, auto-rotate every 10 seconds
-  const VISIBLE_LIMIT = typeof visibleLimit === 'number' ? visibleLimit : 6;
+  const VISIBLE_LIMIT = typeof visibleLimit === 'number' ? visibleLimit : 5;
   const [visibleGroup, setVisibleGroup] = useState(0);
   const totalGroups = Math.ceil(flatRows.length / VISIBLE_LIMIT);
 
@@ -251,19 +255,31 @@ interface Props {
       }} />
 
       <div className={deviceType === 'mobile' ? 'overflow-x-auto' : ''}>
+
+        <div className="bg-gradient-to-br from-[#c4cfe2] to-[#4d8be9] rounded-2xl text-white flex flex-col items-center justify-center 
+           shadow-xl relative overflow-hidden h-[50px]">
+
+          <h2 className={getTVTextSize("text-lg md:text-2xl font-bold z-10")}>
+            Upcoming Meetings
+          </h2>
+
+          </div>
+
         <table className={`min-w-full border border-gray-300 text-black bg-white rounded-xl overflow-hidden ${
           deviceType === 'mobile' ? 'mobile-table' : getTVTextSize("text-xs md:text-sm")
         }`}>
+          
         <thead className={getTVTextSize("bg-[#0B3D91] text-white text-sm md:text-base")}>
           <tr>
-            <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-no p-1' : 'p-1.5 md:p-2 w-[40px] md:w-[50px]'}`}>No</th>
+            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-no p-1' : 'p-1.5 md:p-2 w-[40px] md:w-[50px]'}`}>No</th> */}
             {/* <th className={`border ${deviceType === 'mobile' ? 'mobile-col-tanggal p-1' : 'p-1.5 md:p-2 w-[160px] md:w-[200px]'}`}>Tanggal</th> */}
-            <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-pukul p-1' : 'p-1.5 md:p-2 w-[110px] md:w-[130px]'}`}>Pukul</th>
-            <th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2'}`}>Judul</th>
-            <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-lokasi p-1' : 'p-1.5 md:p-2 w-[90px] md:w-[110px]'}`}>Lokasi</th>
+            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-pukul p-1' : 'p-1.5 md:p-2 w-[110px] md:w-[130px]'}`}>Pukul</th>*/}
+            {/*<th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2'}`}>Judul</th>*/}
+            {/*th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2 w-[200px] md:w-[380px]'}`}>AGENDA</th>*/}
+            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-lokasi p-1' : 'p-1.5 md:p-2 w-[90px] md:w-[110px]'}`}>Lokasi</th>*/}
             {/*<th className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Gunakan Zoom</th>*/}
-            <th className={`border ${deviceType === 'mobile' ? 'mobile-col-keterangan p-1' : 'p-1.5 md:p-2'}`}>Keterangan</th>
-            <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-status p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Status</th>
+            {/*<th className={`border ${deviceType === 'mobile' ? 'mobile-col-keterangan p-1' : 'p-1.5 md:p-2'}`}>Keterangan</th>*/}
+            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-status p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Status</th>*/}
           </tr>
         </thead>
 
@@ -276,12 +292,13 @@ interface Props {
             const rowHeight = deviceType === 'mobile' ? '50px' : deviceType === 'tv-small' ? '55px' : deviceType === 'tv-large' ? '60px' : '55px';
 
             return (
+              
               <tr 
                 key={`${row.tanggal}-${idx}`} 
                 className="hover:bg-gray-50"
                 style={{ height: rowHeight }}
               >
-                <td>{no}</td>
+                {/*<td>{no}</td> ROWS */}
 
                 {/* {row.isFirstOfDate && (
                   <>
@@ -325,18 +342,23 @@ interface Props {
                 {/* JUDUL - dengan scrolling text */}
                 <td className={`border ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
                   <div className={`overflow-hidden whitespace-nowrap ${
-                    deviceType === 'mobile' ? 'w-[140px]' : 'w-[180px] md:w-[250px]'
+                    deviceType === 'mobile' ? 'w-[140px]' : 'w-[180px] md:w-[180px]'
                   }`}>
                     <ScrollingText text={row.data.judul} maxLength={deviceType === 'mobile' ? 15 : 25} />
                   </div>
+
+                  {/* LOKASI - dengan scrolling text */}
+                  <div className={deviceType === 'mobile' ? 'text-[9px]' : 'text-xs md:text-sm'}>
+                    <ScrollingText text={row.data.room?.name || row.data.lokasi} maxLength={deviceType === 'mobile' ? 8 : 15} />
+                  </div>
                 </td>
 
-                {/* LOKASI - dengan scrolling text */}
+                {/* LOKASI - dengan scrolling text 
                 <td className={`border text-center ${deviceType === 'mobile' ? 'p-1 max-w-[70px]' : 'p-1.5 md:p-2 max-w-[90px] md:max-w-[110px]'}`}>
                   <div className={deviceType === 'mobile' ? 'text-[9px]' : 'text-xs md:text-sm'}>
                     <ScrollingText text={row.data.lokasi} maxLength={deviceType === 'mobile' ? 8 : 15} />
                   </div>
-                </td>
+                </td>*/}
 
                 {/* GUNAKAN ZOOM 
                 <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
@@ -351,14 +373,14 @@ interface Props {
                   </span>
                 </td>*/}
 
-                {/* KETERANGAN - dengan scrolling text */}
+                {/* KETERANGAN - dengan scrolling text 
                 <td className={`border ${deviceType === 'mobile' ? 'p-1 max-w-[130px]' : 'p-1.5 md:p-2 max-w-[180px] md:max-w-[250px]'}`}>
                   <div className={`leading-snug ${deviceType === 'mobile' ? 'text-[9px]' : 'text-xs md:text-sm'}`}>
                     <ScrollingText text={row.data.keterangan || "-"} maxLength={deviceType === 'mobile' ? 15 : 30} />
                   </div>
-                </td>
+                </td>*/}
 
-                {/* STATUS */}
+                {/* STATUS 
                 <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
                   <span
                     className={`px-1.5 rounded-full font-semibold whitespace-nowrap ${
@@ -373,7 +395,7 @@ interface Props {
                   >
                     {row.data.status}
                   </span>
-                </td>
+                </td>*/}
               </tr>
             );
           })}

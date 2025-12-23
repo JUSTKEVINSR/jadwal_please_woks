@@ -18,7 +18,7 @@ class AuthApiController extends Controller
         ]);
 
         // Cari user
-        $user = User::where('email', $request->email)->first();
+        $user = UserPlus::where('email', $request->email)->first();
 
         // Validasi manual
         if (!$user || !Hash::check($request->password, $user->password)) {

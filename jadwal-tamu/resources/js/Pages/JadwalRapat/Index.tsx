@@ -25,6 +25,8 @@ interface JadwalRapat {
     gunakan_zoom: "yes" | "no";
     nama_pic: string;
     nomor_pic: string;
+    kasubak: "pending" | "rejected" | "approve";
+    ula: "pending" | "rejected" | "approve";
 }
 
 const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, fetchBookedDates }: { 
@@ -166,12 +168,33 @@ const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, 
 };
 
 export default function Index() {
-    const { jadwal, statusFilter, rooms } = usePage().props as any;
+    const { jadwal, statusFilter, rooms, auth } = usePage().props as any;
     const [filter, setFilter] = useState(statusFilter);
+    
+    // Check if the user has the required role to edit or delete any jadwal rapat
+    const canEditAnyJadwal = auth.user && ['admin', 'ula', 'kasubak'].includes(auth.user.role);
+    const canDeleteIndividualJadwal = auth.user && ['user'].includes(auth.user.role);
+    
+    // Check if the user has the required role to interact with Kasubak dropdown
+    const canInteractWithKasubak = auth.user && ['admin', 'kasubak'].includes(auth.user.role);
+
+     // Check if the user has the required role to interact with Ula dropdown
+    const canInteractWithUla = auth.user && ['admin', 'ula'].includes(auth.user.role);
+
+    // Check if the user has the required role to interact with only Admin
+    const canInteractWithOnlyAdmin = auth.user && ['admin'].includes(auth.user.role);
+
+
 
     const [statusDropdown, setStatusDropdown] = useState<number | null>(null);
+    const [kasubakDropdown, setKasubakDropdown] = useState<number | null>(null);
+    const [ulaDropdown, setUlaDropdown] = useState<number | null>(null);
     useEffect(() => {
-        const listener = () => setStatusDropdown(null);
+        const listener = () => {
+            setStatusDropdown(null);
+            setKasubakDropdown(null);
+            setUlaDropdown(null);
+        };
         window.addEventListener("click", listener);
         return () => window.removeEventListener("click", listener);
     }, []);
@@ -188,6 +211,8 @@ export default function Index() {
         gunakan_zoom: "no",
         nama_pic: "",
         nomor_pic: "",
+        kasubak: "pending",
+        ula: "pending",
     });
 
     // ✅ Step 1: Grouping berdasarkan tanggal
@@ -222,6 +247,7 @@ export default function Index() {
     // Ambil info halaman dari backend
     const page = jadwal.current_page;
     const totalPages = jadwal.last_page;
+    
 
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [pickerTarget, setPickerTarget] = useState<
@@ -258,6 +284,8 @@ export default function Index() {
             gunakan_zoom: "no",
             nama_pic: "",
             nomor_pic: "",
+            kasubak: "pending",
+            ula: "pending",
         });
         setModalMode("add");
         setShowModal(true);
@@ -276,6 +304,8 @@ export default function Index() {
             gunakan_zoom: item.gunakan_zoom,
             nama_pic: item.nama_pic || "",
             nomor_pic: item.nomor_pic || "",
+            kasubak: item.kasubak || "pending",
+            ula: item.ula || "pending",
         });
         setModalMode("edit");
         setShowModal(true);
@@ -295,6 +325,8 @@ const handleSubmit = (e: React.FormEvent) => {
         gunakan_zoom: form.gunakan_zoom,
         nama_pic: form.nama_pic,
         nomor_pic: form.nomor_pic,
+        kasubak: form.kasubak,
+        ula: form.ula,
     };
 
     if (modalMode === "add") {
@@ -317,6 +349,7 @@ const handleSubmit = (e: React.FormEvent) => {
 };
 
 
+    // Handle status change
     const handleStatusChange = (
         id: number,
         newStatus: "Belum" | "Proses" | "Selesai"
@@ -333,6 +366,7 @@ const handleSubmit = (e: React.FormEvent) => {
             }
         );
     };
+    
 
     const handleSetTimeFromPicker = () => {
         const formatted = `${String(selectedHour).padStart(2, "0")}:${String(
@@ -369,6 +403,7 @@ const handleSubmit = (e: React.FormEvent) => {
     const fetchBookedDates = async (month: string, lokasi: number) => {
         try {
             const url = `/jadwal-rapat/booked-dates?month=${month}&lokasi=${lokasi}`;
+            
             console.log('Fetching booked dates:', url);
             const response = await fetch(url);
             const data = await response.json();
@@ -386,6 +421,18 @@ const handleSubmit = (e: React.FormEvent) => {
         console.log(`Checking if ${time} is booked:`, booked);
         return booked;
     };
+
+    // Fetch booked data when location changes
+    useEffect(() => {
+        // Fetch booked times for current date and new location
+        if (form.tanggal && form.lokasi) {
+            fetchBookedTimes(form.tanggal, form.lokasi, modalMode === "edit" ? form.id : undefined);
+        }
+        
+        // Fetch booked dates for current month and new location
+        const currentMonth = `${form.tanggal.getFullYear()}-${String(form.tanggal.getMonth() + 1).padStart(2, '0')}`;
+        fetchBookedDates(currentMonth, form.lokasi);
+    }, [form.lokasi, form.tanggal, modalMode, form.id]);
 
     const isHourBooked = (hour: number) => {
         const hour24 = ampm === 'AM' ? (hour === 12 ? 0 : hour) : (hour === 12 ? 12 : hour + 12);
@@ -424,12 +471,12 @@ const handleSubmit = (e: React.FormEvent) => {
         
         // Check for "Belum" status (highest priority)
         if (bookingsOnDate.some(booking => booking.status === 'Belum')) {
-            return '#dc2626'; // Red: Has unstarted bookings
+            return '#eab308'; // Yellow: Has unstarted bookings
         }
         
         // Check for "Proses" status
         if (bookingsOnDate.some(booking => booking.status === 'Proses')) {
-            return '#eab308'; // Yellow: Has ongoing bookings
+            return '#dc2626'; // Red: Has ongoing bookings
         }
         
         // Default: All "Selesai" or other statuses
@@ -442,6 +489,56 @@ const handleSubmit = (e: React.FormEvent) => {
     ) => {
         handleStatusChange(id, newStatus);
         setStatusDropdown(null);
+    };
+
+    const handleKasubakChange = (
+        id: number,
+        newKasubak: "pending" | "rejected" | "approve"
+    ) => {
+        router.put(
+            `/jadwal-rapat/${id}`,
+            { kasubak: newKasubak },
+            {
+                onSuccess: () => {
+                    toast.info(`📌 Kasubak diubah menjadi ${newKasubak}`);
+                    router.reload({ only: ["jadwal"] });
+                },
+                onError: () => toast.error("❌ Gagal mengubah kasubak!"),
+            }
+        );
+    };
+
+    const handleUlaChange = (
+        id: number,
+        newUla: "pending" | "rejected" | "approve"
+    ) => {
+        router.put(
+            `/jadwal-rapat/${id}`,
+            { ula: newUla },
+            {
+                onSuccess: () => {
+                    toast.info(`📌 ULA diubah menjadi ${newUla}`);
+                    router.reload({ only: ["jadwal"] });
+                },
+                onError: () => toast.error("❌ Gagal mengubah ULA!"),
+            }
+        );
+    };
+
+    const changeKasubak = (
+        id: number,
+        newKasubak: "pending" | "rejected" | "approve"
+    ) => {
+        handleKasubakChange(id, newKasubak);
+        setKasubakDropdown(null);
+    };
+
+    const changeUla = (
+        id: number,
+        newUla: "pending" | "rejected" | "approve"
+    ) => {
+        handleUlaChange(id, newUla);
+        setUlaDropdown(null);
     };
 
     return (
@@ -524,9 +621,17 @@ const handleSubmit = (e: React.FormEvent) => {
                                     Nomor PIC
                                 </th>
 
-                                <th className="px-1 md:px-2 py-2 text-center border">
-                                    Status
-                                </th>
+                                <th className="px-1 md:px-2 py-2 border">
+                                   Kasubak
+                               </th>
+
+                               <th className="px-1 md:px-2 py-2 border">
+                                   ULA
+                               </th>
+
+                               <th className="px-1 md:px-2 py-2 text-center border">
+                                   Status
+                               </th>
                                 <th className="px-1 md:px-2 py-2 text-center border">
                                     Aksi
                                 </th>
@@ -592,27 +697,177 @@ const handleSubmit = (e: React.FormEvent) => {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation(); // ✅ penting!
-                                                setStatusDropdown((prev) =>
+                                                if (canInteractWithKasubak) {
+                                                    setKasubakDropdown((prev) =>
+                                                        prev === row.data.id
+                                                            ? null
+                                                            : row.data.id
+                                                    );
+                                                }
+                                            }}
+                                            className={`px-3 py-1 rounded-md text-xs font-semibold block mx-auto
+                                            ${
+                                                row.data.kasubak === "approve"
+                                                    ? "bg-green-600 text-white"
+                                                    : row.data.kasubak === "pending"
+                                                    ? "bg-yellow-400 text-gray-800"
+                                                    : "bg-red-500 text-white"
+                                            }
+                                            ${!canInteractWithKasubak ? "cursor-not-allowed opacity-100" : ""}
+                                            `}
+                                            disabled={!canInteractWithKasubak}
+                                        >
+                                            {row.data.kasubak}
+                                        </button>
+
+                                        {/* ✅ Kasubak Dropdown custom */}
+                                        {kasubakDropdown === row.data.id && canInteractWithKasubak && (
+                                            <div
+                                                className="absolute z-50 bg-white border rounded-lg shadow-md w-28 text-xs text-gray-700 left-1/2 -translate-x-1/2 mt-1 overflow-hidden"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                <div
+                                                    className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() =>
+                                                        changeKasubak(
+                                                            row.data.id,
+                                                            "pending"
+                                                        )
+                                                    }
+                                                >
+                                                    Pending
+                                                </div>
+                                                <div
+                                                    className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() =>
+                                                        changeKasubak(
+                                                            row.data.id,
+                                                            "rejected"
+                                                        )
+                                                    }
+                                                >
+                                                    Rejected
+                                                </div>
+                                                <div
+                                                    className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() =>
+                                                        changeKasubak(
+                                                            row.data.id,
+                                                            "approve"
+                                                        )
+                                                    }
+                                                >
+                                                    Approve
+                                                </div>
+                                            </div>
+                                        )}
+                                    </td>
+
+                                    <td className="px-1 py-2 text-center border border-gray-300 relative">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // ✅ penting!
+                                                if (canInteractWithUla){
+                                                    setUlaDropdown((prev) =>
+                                                        prev === row.data.id
+                                                            ? null
+                                                            : row.data.id
+                                                    );
+                                                }
+                                                
+                                            }}
+                                            className={`px-3 py-1 rounded-md text-xs font-semibold block mx-auto
+                                            ${
+                                                row.data.ula === "approve"
+                                                    ? "bg-green-600 text-white"
+                                                    : row.data.ula === "pending"
+                                                    ? "bg-yellow-400 text-gray-800"
+                                                    : "bg-red-500 text-white"
+                                            }
+                                            ${!canInteractWithUla ? "cursor-not-allowed opacity-100" : ""}
+                                            `}
+                                            disabled={!canInteractWithUla}
+                                        >
+                                            {row.data.ula}
+                                        </button>
+
+                                        {/* ✅ ULA Dropdown custom */}
+                                        {ulaDropdown === row.data.id && canInteractWithUla &&(
+                                            <div
+                                                className="absolute z-50 bg-white border rounded-lg shadow-md w-28 text-xs text-gray-700 left-1/2 -translate-x-1/2 mt-1 overflow-hidden"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                <div
+                                                    className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() =>
+                                                        changeUla(
+                                                            row.data.id,
+                                                            "pending"
+                                                        )
+                                                    }
+                                                >
+                                                    Pending
+                                                </div>
+                                                <div
+                                                    className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() =>
+                                                        changeUla(
+                                                            row.data.id,
+                                                            "rejected"
+                                                        )
+                                                    }
+                                                >
+                                                    Rejected
+                                                </div>
+                                                <div
+                                                    className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() =>
+                                                        changeUla(
+                                                            row.data.id,
+                                                            "approve"
+                                                        )
+                                                    }
+                                                >
+                                                    Approve
+                                                </div>
+                                            </div>
+                                        )}
+                                    </td>
+
+                                    <td className="px-1 py-2 text-center border border-gray-300 relative">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // ✅ penting!
+                                                if (canInteractWithOnlyAdmin){
+                                                    setStatusDropdown((prev) =>
                                                     prev === row.data.id
                                                         ? null
                                                         : row.data.id
                                                 );
+                                                }
+                                                
                                             }}
                                             className={`px-3 py-1 rounded-md text-xs font-semibold block mx-auto
-                      ${
-                          row.data.status === "Selesai"
-                              ? "bg-green-600 text-white"
-                              : row.data.status === "Proses"
-                              ? "bg-yellow-400 text-gray-800"
-                              : "bg-red-500 text-white"
-                      }
-                    `}
+                                            ${
+                                                row.data.status === "Selesai"
+                                                    ? "bg-green-600 text-white"
+                                                    : row.data.status === "Proses"
+                                                    ? "bg-yellow-400 text-gray-800"
+                                                    : "bg-red-500 text-white"
+                                            }
+                                            ${!canInteractWithOnlyAdmin ? "cursor-not-allowed opacity-100" : ""}
+                                            `}
+                                            disabled={!canInteractWithOnlyAdmin}
                                         >
                                             {row.data.status}
                                         </button>
 
                                         {/* ✅ Dropdown custom */}
-                                        {statusDropdown === row.data.id && (
+                                        {statusDropdown === row.data.id && canInteractWithOnlyAdmin && (
                                             <div
                                                 className="absolute z-50 bg-white border rounded-lg shadow-md w-28 text-xs text-gray-700 left-1/2 -translate-x-1/2 mt-1 overflow-hidden"
                                                 onClick={(e) =>
@@ -657,29 +912,32 @@ const handleSubmit = (e: React.FormEvent) => {
                                     </td>
 
                                     <td className="px-4 py-2 text-center border border-gray-300 space-x-3">
-                                        <button
-                                            onClick={() => handleEdit(row.data)}
-                                            className="text-yellow-500 hover:text-yellow-600"
-                                        >
-                                            <FaEdit />
-                                        </button>
-                                        <button
-                                        onClick={() => {
-                                            if(confirm("Hapus jadwal ini?")) {
-                                            router.delete(`/jadwal-rapat/${row.data.id}`, {
-                                                onSuccess: () => {
-                                                toast.success("🗑️ Jadwal dihapus");
-                                                router.reload({ only: ["jadwal"] });
-                                                },
-                                                onError: () => toast.error("❌ Gagal menghapus"),
-                                            });
-                                            }
-                                        }}
-                                        className="text-red-500 hover:text-red-700"
-                                        >
-                                        <FaTrash />
-                                        </button>
-
+                                        {(canEditAnyJadwal || row.data.user_id === auth.user.id) && (
+                                            <button
+                                                onClick={() => handleEdit(row.data)}
+                                                className="text-yellow-500 hover:text-yellow-600"
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                        )}
+                                        {(canEditAnyJadwal || canDeleteIndividualJadwal && row.data.user_id === auth.user.id) && (
+                                            <button
+                                                onClick={() => {
+                                                    if(confirm("Hapus jadwal ini?")) {
+                                                        router.delete(`/jadwal-rapat/${row.data.id}`, {
+                                                            onSuccess: () => {
+                                                                toast.success("🗑️ Jadwal dihapus");
+                                                                router.reload({ only: ["jadwal"] });
+                                                            },
+                                                            onError: () => toast.error("❌ Gagal menghapus"),
+                                                        });
+                                                    }
+                                                }}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -844,7 +1102,7 @@ const handleSubmit = (e: React.FormEvent) => {
                                     </div>
                                 </div>
 
-                                {/* judul */}
+                               
                                 <div className="col-span-3">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                                         Judul
@@ -943,7 +1201,25 @@ const handleSubmit = (e: React.FormEvent) => {
                                     </select>
                                 </div>
 
-                                
+                                {/* Kasubak Select Dropdown 
+                                <div className="col-span-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Kasubak</label>
+                                    <select
+                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
+                                        value={form.kasubak}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                kasubak: e.target.value as "pending" | "rejected" | "approve",
+                                            })
+                                        }
+                                        required
+                                    >
+                                        <option value="pending">Pending</option>
+                                        <option value="rejected">Rejected</option>
+                                        <option value="approve">Approve</option>
+                                    </select>
+                                </div>*/}
 
                                 {/* Nama PIC */}
                                 <div className="col-span-2">
@@ -1042,33 +1318,25 @@ const handleSubmit = (e: React.FormEvent) => {
                             {pickerStep === "hour" &&
                                 Array.from({ length: 12 }, (_, i) => {
                                     const hour = i + 1;
+                                    const hour24 = ampm === 'AM' ? (hour === 12 ? 0 : hour) : (hour === 12 ? 12 : hour + 12);
+                                    const isBooked = isHourBooked(hour);
                                     const angle = (hour / 12) * 2 * Math.PI;
                                     const x = 110 + 80 * Math.sin(angle);
                                     const y = 110 - 80 * Math.cos(angle);
                                     return (
                                         <div
                                             key={hour}
-                                            onClick={() =>
-                                                setSelectedHour(hour)
-                                            }
+                                            onClick={() => !isBooked && setSelectedHour(hour)}
                                             style={{
                                                 position: "absolute",
                                                 top: y,
                                                 left: x,
-                                                transform:
-                                                    "translate(-50%, -50%)",
-                                                cursor: "pointer",
-                                                fontWeight:
-                                                    selectedHour === hour
-                                                        ? "bold"
-                                                        : "normal",
-                                                color:
-                                                    selectedHour === hour
-                                                        ? "#00427c"
-                                                        : (() => {
-                                                            const hour24 = ampm === 'AM' ? (hour === 12 ? 0 : hour) : (hour === 12 ? 12 : hour + 12);
-                                                            return getTimeColor(hour24, 0);
-                                                        })(),
+                                                transform: "translate(-50%, -50%)",
+                                                cursor: isBooked ? "not-allowed" : "pointer",
+                                                pointerEvents: isBooked ? "none" : "auto",
+                                                opacity: isBooked ? 1 : 1,
+                                                fontWeight: selectedHour === hour ? "bold" : "normal",
+                                                color: selectedHour === hour ? "#00427c" : getTimeColor(hour24, 0),
                                                 fontSize: "1.1rem",
                                             }}
                                         >
@@ -1080,33 +1348,24 @@ const handleSubmit = (e: React.FormEvent) => {
                             {pickerStep === "minute" &&
                                 Array.from({ length: 12 }, (_, i) => {
                                     const minute = i * 5;
+                                    const isBooked = isMinuteBooked(minute);
                                     const angle = (minute / 60) * 2 * Math.PI;
                                     const x = 110 + 80 * Math.sin(angle);
                                     const y = 110 - 80 * Math.cos(angle);
                                     return (
                                         <div
                                             key={minute}
-                                            onClick={() =>
-                                                setSelectedMinute(minute)
-                                            }
+                                            onClick={() => !isBooked && setSelectedMinute(minute)}
                                             style={{
                                                 position: "absolute",
                                                 top: y,
                                                 left: x,
-                                                transform:
-                                                    "translate(-50%, -50%)",
-                                                cursor: "pointer",
-                                                fontWeight:
-                                                    selectedMinute === minute
-                                                        ? "bold"
-                                                        : "normal",
-                                                color:
-                                                    selectedMinute === minute
-                                                        ? "#00427c"
-                                                        : (() => {
-                                                            const hour24 = ampm === 'AM' ? (selectedHour === 12 ? 0 : selectedHour) : (selectedHour === 12 ? 12 : selectedHour + 12);
-                                                            return getTimeColor(hour24, minute);
-                                                        })(),
+                                                transform: "translate(-50%, -50%)",
+                                                cursor: isBooked ? "not-allowed" : "pointer",
+                                                pointerEvents: isBooked ? "none" : "auto",
+                                                opacity: isBooked ? 1 : 1,
+                                                fontWeight: selectedMinute === minute ? "bold" : "normal",
+                                                color: selectedMinute === minute ? "#00427c" : getTimeColor(ampm === 'AM' ? (selectedHour === 12 ? 0 : selectedHour) : (selectedHour === 12 ? 12 : selectedHour + 12), minute),
                                                 fontSize: "1rem",
                                             }}
                                         >

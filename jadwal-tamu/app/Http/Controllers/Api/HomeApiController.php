@@ -12,7 +12,7 @@ class HomeApiController extends Controller
     public function index()
     {
         // Jadwal: sama seperti HomeController
-        $jadwal = JadwalRapat::where('status', '!=', 'Selesai')
+        $jadwal = JadwalRapat::with('room')->where('status', '!=', 'Selesai')
             ->orderBy('tanggal', 'asc')
             ->orderBy('jam_mulai', 'asc')
             ->get();

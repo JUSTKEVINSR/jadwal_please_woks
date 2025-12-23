@@ -28,7 +28,12 @@ class UserController extends Controller
                  'id' => $user->id,
                  'name' => $user->name,
                  'email' => $user->email,
-                 'role' => $user->role_code === 1945 ? 'admin' : 'user',
+                 'role' => match ($user->role_code) {
+                     1945 => 'admin',
+                     8008 => 'ula',
+                     880 => 'kasubak',
+                     default => 'user',
+                 },
              ];
          });
  
@@ -46,13 +51,13 @@ class UserController extends Controller
         \Log::info('UserController store called', ['request_data' => $request->all()]);
 
         if (! $request->user()->isAdmin()) {abort(403); // Forbidden
- }
+}
         // 1. Validation
          $validated = $request->validate([
              'name' => 'required|string|max:255',
              'email' => 'required|string|email|max:255|unique:users_plus,email',
              'password' => 'required|string|min:8',
-             'role' => 'required|in:user,admin',
+             'role' => 'required|in:user,admin,ula,kasubak',
              //'password' => ['required', 'confirmed', Rules\Password::defaults()],
              // Optional: Validate role if your system uses them
              // 'role' => 'required|in:admin,editor,user',
@@ -60,7 +65,13 @@ class UserController extends Controller
         \Log::info('Validation passed', ['validated' => $validated]);
        try {
         // 2. Creation
-        $roleCode = $validated['role'] === 'admin' ? 1945 : 1969;
+        // Map role to role_code
+        $roleCode = match ($validated['role']) {
+            'admin' => 1945,
+            'ula' => 8008,
+            'kasubak' => 880,
+            default => 1969, // user
+        };
         $user = UserPlus::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -97,12 +108,17 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users_plus,email',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:user,admin',
+            'role' => 'required|in:user,admin,ula,kasubak',
         ]);
         \Log::info('Validation passed', ['validated' => $validated]);
 
         // Map role to role_code
-        $roleCode = $validated['role'] === 'admin' ? 1945 : 1969;
+        $roleCode = match ($validated['role']) {
+            'admin' => 1945,
+            'ula' => 8008,
+            'kasubak' => 880,
+            default => 1969, // user
+        };
 
         try {
             // 2. Creation
@@ -137,12 +153,17 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users_plus,email,' . $id,
             'password' => 'nullable|string|min:8',
-            'role' => 'required|in:user,admin',
+            'role' => 'required|in:user,admin,ula,kasubak',
         ]);
         \Log::info('Validation passed', ['validated' => $validated]);
 
         // Map role to role_code
-        $roleCode = $validated['role'] === 'admin' ? 1945 : 1969;
+        $roleCode = match ($validated['role']) {
+            'admin' => 1945,
+            'ula' => 8008,
+            'kasubak' => 880,
+            default => 1969, // user
+        };
 
         try {
             // 2. Find and update

@@ -54,6 +54,20 @@ class DaftarTamuApiController extends Controller
             ], 403);
         }
 
+        if (!$user->isUla() && $tamu->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only edit your own entries.'
+            ], 403);
+        }
+
+        if (!$user->isKasubak() && $tamu->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only edit your own entries.'
+            ], 403);
+        }
+
         $data = $request->validate([
             'nama' => 'required|string|max:255',
             'jabatan' => 'nullable|string|max:255',
@@ -78,6 +92,20 @@ class DaftarTamuApiController extends Controller
         // Authorization: Admin can delete any entry, non-admin can only delete their own
         $user = auth()->user();
         if (!$user->isAdmin() && $tamu->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only delete your own entries.'
+            ], 403);
+        }
+
+        if (!$user->isUla() && $tamu->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only delete your own entries.'
+            ], 403);
+        }
+
+        if (!$user->isKasubak() && $tamu->user_id !== $user->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'You can only delete your own entries.'

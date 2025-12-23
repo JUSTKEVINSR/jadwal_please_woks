@@ -14,7 +14,7 @@ class JadwalRapatApiController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => JadwalRapat::where('user_id', $request->user()->id)
+            'data' => JadwalRapat::with('room')->where('user_id', $request->user()->id)
                 ->orderBy('tanggal', 'desc')
                 ->orderBy('jam_mulai', 'asc')
                 ->get()
@@ -54,7 +54,19 @@ class JadwalRapatApiController extends Controller
     // PUT /api/jadwal/{jadwal}
     public function update(Request $request, JadwalRapat $jadwal)
     {
-        if ($jadwal->user_id !== $request->user()->id) {
+        $user = $request->user();
+        
+        // Log the user's role and the result of the role check
+        \Log::info('JadwalRapatApiController@update: User role check', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'jadwal_user_id' => $jadwal->user_id,
+            'is_owner' => $jadwal->user_id === $user->id,
+            'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak']),
+        ]);
+        
+        // Check if the user is the owner or has the required role
+        if ($jadwal->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -83,7 +95,19 @@ class JadwalRapatApiController extends Controller
     // DELETE /api/jadwal/{jadwal}
     public function destroy(Request $request, JadwalRapat $jadwal)
     {
-        if ($jadwal->user_id !== $request->user()->id) {
+        $user = $request->user();
+        
+        // Log the user's role and the result of the role check
+        \Log::info('JadwalRapatApiController@destroy: User role check', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'jadwal_user_id' => $jadwal->user_id,
+            'is_owner' => $jadwal->user_id === $user->id,
+            'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak']),
+        ]);
+        
+        // Check if the user is the owner or has the required role
+        if ($jadwal->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 

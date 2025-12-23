@@ -20,7 +20,7 @@ interface UserData {
      // State property names match the 'name' attribute in the inputs
      password: string;
      passwordConfirm: string;
-     role: 'user' | 'admin';
+     role: 'user' | 'admin' | 'ula' | 'kasubak';
 }
 
 // Define props for the component
@@ -267,6 +267,8 @@ const Create: React.FC<NewUserFormProps> = (props: NewUserFormProps) => {
                             >
                                 <option value="user">User</option>
                                 <option value="admin">Admin</option>
+                                <option value="ula">ULA</option>
+                                <option value="kasubak">Kasubak</option>
                             </select>
                         </div>
 
