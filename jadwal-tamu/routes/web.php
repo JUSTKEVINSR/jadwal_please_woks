@@ -21,14 +21,23 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 // CRUD Jadwal Rapat
-Route::resource('jadwal-rapat', JadwalRapatController::class)->middleware(['auth']);
+Route::middleware(['auth'])->group(function () {
+    Route::get('/jadwal-rapat', [JadwalRapatController::class, 'index'])->name('jadwal-rapat.index');
+    Route::post('/jadwal-rapat', [JadwalRapatController::class, 'store'])->name('jadwal-rapat.store');
+    Route::put('/jadwal-rapat/{jadwalRapat}', [JadwalRapatController::class, 'update'])->name('jadwal-rapat.update');
+    Route::delete('/jadwal-rapat/{jadwalRapat}', [JadwalRapatController::class, 'destroy'])->name('jadwal-rapat.destroy');
+    Route::get('/jadwal-rapat/booked-times', [JadwalRapatController::class, 'getBookedTimes'])->name('jadwal-rapat.booked-times');
+    Route::get('/jadwal-rapat/booked-dates', [JadwalRapatController::class, 'getBookedDates'])->name('jadwal-rapat.booked-dates');
+});
 // CRUD Daftar Tamu
 // Route::resource('daftar-tamu', DaftarTamuController::class)->middleware(['auth']);
  // ✅ Daftar Tamu - PERBAIKAN ROUTE
-    Route::get('/daftar-tamu', [DaftarTamuController::class, 'index'])->name('daftar-tamu.index');
-    Route::post('/daftar-tamu', [DaftarTamuController::class, 'store'])->name('daftar-tamu.store');
-    Route::put('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'update'])->name('daftar-tamu.update');
-    Route::delete('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'destroy'])->name('daftar-tamu.destroy');
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/daftar-tamu', [DaftarTamuController::class, 'index'])->name('daftar-tamu.index');
+        Route::post('/daftar-tamu', [DaftarTamuController::class, 'store'])->name('daftar-tamu.store');
+        Route::put('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'update'])->name('daftar-tamu.update');
+        Route::delete('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'destroy'])->name('daftar-tamu.destroy');
+    });
 // CRUD Manajemen Video
 // ✅ MANUAL DEFINE CRUD VIDEO (mencegah bentrok)
 Route::middleware(['auth'])->group(function () {

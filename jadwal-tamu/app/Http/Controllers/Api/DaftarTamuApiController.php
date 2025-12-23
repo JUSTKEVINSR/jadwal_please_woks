@@ -32,6 +32,8 @@ class DaftarTamuApiController extends Controller
             'jam_selesai' => 'required|string',
         ]);
 
+        $data['user_id'] = auth()->id();
+
         $tamu = DaftarTamu::create($data);
 
         return response()->json([
@@ -43,6 +45,15 @@ class DaftarTamuApiController extends Controller
     // PUT /api/tamu/{tamu}
     public function update(Request $request, DaftarTamu $tamu)
     {
+        // Authorization: Admin can edit any entry, non-admin can only edit their own
+        $user = auth()->user();
+        if (!$user->isAdmin() && $tamu->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only edit your own entries.'
+            ], 403);
+        }
+
         $data = $request->validate([
             'nama' => 'required|string|max:255',
             'jabatan' => 'nullable|string|max:255',
@@ -64,6 +75,15 @@ class DaftarTamuApiController extends Controller
     // DELETE /api/tamu/{tamu}
     public function destroy(DaftarTamu $tamu)
     {
+        // Authorization: Admin can delete any entry, non-admin can only delete their own
+        $user = auth()->user();
+        if (!$user->isAdmin() && $tamu->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only delete your own entries.'
+            ], 403);
+        }
+
         $tamu->delete();
 
         return response()->json([

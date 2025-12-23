@@ -41,6 +41,8 @@ class DaftarTamuController extends Controller
             'jam_selesai' => 'required|string',
         ]);
 
+        $validated['user_id'] = auth()->id();
+
         DaftarTamu::create($validated);
 
         return redirect()
@@ -53,6 +55,12 @@ class DaftarTamuController extends Controller
      */
     public function update(Request $request, DaftarTamu $daftarTamu)
     {
+        // Authorization: Admin can edit any entry, non-admin can only edit their own
+        $user = auth()->user();
+        if (!$user->isAdmin() && $daftarTamu->user_id !== $user->id) {
+            abort(403, 'You can only edit your own entries.');
+        }
+
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'jabatan' => 'nullable|string|max:255',
@@ -75,6 +83,12 @@ class DaftarTamuController extends Controller
      */
     public function destroy(DaftarTamu $daftarTamu)
     {
+        // Authorization: Admin can delete any entry, non-admin can only delete their own
+        $user = auth()->user();
+        if (!$user->isAdmin() && $daftarTamu->user_id !== $user->id) {
+            abort(403, 'You can only delete your own entries.');
+        }
+
         $daftarTamu->delete();
 
         return redirect()

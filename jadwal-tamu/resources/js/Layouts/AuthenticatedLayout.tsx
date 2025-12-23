@@ -39,35 +39,39 @@ export default function AuthenticatedLayout({
   const menu = [
     { name: "Dashboard", href: "/dashboard", icon: <FaHome /> },
     { name: "Jadwal Rapat", href: "/jadwal-rapat", icon: <FaCalendarAlt /> },
+
+    ...(isAdmin ? [
     { name: "Daftar Tamu", href: "/daftar-tamu", icon: <FaUsers /> },
     { name: "Manajemen Video", href: "/manajemen-video", icon: <FaVideo /> },
+    ] : []),
+
   ];
 
   return (
     <div className="flex min-h-screen bg-[#E9F3FF] text-gray-800">
       {/* ✅ SIDEBAR DESKTOP INI BG SIDE BAR*/}
       <aside className="hidden md:flex fixed inset-y-0 left-0 w-[84px] bg-[#263b5f] flex-col items-center py-6 space-y-6 shadow-xl rounded-r-3xl z-30 overflow-visible">
-        {/* Tombol home */}
+        {/* Tombol home view */}
+        {isAdmin && (
         <Link
           href="/"
           className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
           title="Home"
         >
-          I
+          TV
         </Link>
+         )}
 
-        {/* Tombol user baru - ONLY VISIBLE TO ADMINS isAdmin is remove because error*/  } 
-        
+        {/* Tombol user baru - ONLY VISIBLE TO ADMINS */}
+        {isAdmin && (
             <Link
-                href={route('users.create')}   
-                    
-                className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#910b91] font-bold text-xl hover:bg-white transition"
+                href={route('users.create')}
+                className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
                 title="Create New User"
             >
                 AC
             </Link>
-        
-
+        )}
         {/* ✅ MENU WITH TOOLTIP DISCORD STYLE */}
         <div className="flex flex-col gap-6 text-white mt-6">
           {menu.map((item) => {

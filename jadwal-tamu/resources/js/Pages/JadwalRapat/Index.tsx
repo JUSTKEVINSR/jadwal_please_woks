@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+//import DatePicker from "react-datepicker";
+//import "react-datepicker/dist/react-datepicker.css";
 import {
     FaCalendarAlt,
     FaClock,
@@ -20,12 +20,153 @@ interface JadwalRapat {
     jam_selesai: string;
     judul: string;
     keterangan: string;
-    lokasi: string;
+    lokasi: number;
     status: "Belum" | "Proses" | "Selesai";
+    gunakan_zoom: "yes" | "no";
+    nama_pic: string;
+    nomor_pic: string;
 }
 
+const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, fetchBookedDates }: { 
+    selectedDate: Date; 
+    onDateChange: (date: Date) => void; 
+    lokasi: number;
+    getDateColor: (date: Date) => string;
+    fetchBookedDates: (month: string, lokasi: number) => Promise<void>;
+}) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
+
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+
+    // Fetch booked dates when month changes or lokasi changes
+    useEffect(() => {
+        const month = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+        fetchBookedDates(month, lokasi);
+    }, [currentDate, lokasi, fetchBookedDates]);
+
+    const handleDateClick = (day: number) => {
+        const selected = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        onDateChange(selected);
+        setShowDatePicker(false);
+    };
+
+    const nextMonth = () => {
+        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    };
+
+    const prevMonth = () => {
+        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    };
+
+    // Generate calendar grid
+    const generateCalendar = () => {
+        const calendar = [];
+        const totalCells = 42; // 6 weeks * 7 days
+        let dayCounter = 1;
+
+        for (let i = 0; i < totalCells; i++) {
+            if (i < firstDayOfMonth || dayCounter > daysInMonth) {
+                calendar.push(null); // Empty cell
+            } else {
+                calendar.push(dayCounter++);
+            }
+        }
+        return calendar;
+    };
+
+    const calendarDays = generateCalendar();
+
+    return (
+        <div className="relative">
+            <input
+                type="text"
+                readOnly
+                value={selectedDate.toLocaleDateString('id-ID')}
+                onClick={() => setShowDatePicker(true)}
+                className="w-full border border-gray-300 rounded-md p-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 cursor-pointer text-gray-800"
+            />
+            {showDatePicker && (
+                <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[9999]" onClick={() => setShowDatePicker(false)}>
+                        
+                    <div className="bg-white border rounded-lg shadow-lg p-4 w-80"
+                    style={{
+                            width: 300,
+                            textAlign: "center",
+                            border: "3px solid #00427c",
+                        }}
+                    onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-4">
+                            <button onClick={prevMonth} className="text-[#0B3D91] font-bold text-lg hover:bg-gray-100 px-2 rounded">‹</button>
+                            <span className="font-semibold text-[#0B3D91]">
+                                {currentDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+                            </span>
+                            <button onClick={nextMonth} className="text-[#0B3D91] font-bold text-lg hover:bg-gray-100 px-2 rounded">›</button>
+                        </div>
+
+                        {/* Day headers */}
+                        <div className="grid grid-cols-7 gap-1 mb-2">
+                            {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
+                                <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">
+                                    {day}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Calendar grid */}
+                        <div className="grid grid-cols-7 gap-1">
+                            {calendarDays.map((day, index) => {
+                                const isSelected = day && selectedDate.getDate() === day &&
+                                                 selectedDate.getMonth() === currentDate.getMonth() &&
+                                                 selectedDate.getFullYear() === currentDate.getFullYear();
+                                const isToday = day && new Date().getDate() === day &&
+                                              new Date().getMonth() === currentDate.getMonth() &&
+                                              new Date().getFullYear() === currentDate.getFullYear();
+                                const dateObj = day ? new Date(currentDate.getFullYear(), currentDate.getMonth(), day) : null;
+                                const dayColor = dateObj ? getDateColor(dateObj) : '#16a34a';
+
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={() => day && handleDateClick(day)}
+                                        disabled={!day}
+                                        className={`
+                                            w-8 h-8 text-sm rounded-md transition-colors
+                                            ${!day ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100'}
+                                            ${isSelected ? 'bg-[#0B3D91] text-white font-bold' :
+                                              isToday ? 'bg-blue-100 text-blue-600 font-semibold' :
+                                              day ? 'text-gray-700' : 'text-gray-300'}
+                                        `}
+                                        style={{
+                                            color: isSelected || isToday ? undefined : dayColor,
+                                        }}
+                                    >
+                                        {day}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex justify-end mt-4">
+                            <button
+                                onClick={() => setShowDatePicker(false)}
+
+                                className="border border-red-600 text-red-600 px-3 py-1 rounded"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+          
+         )}
+        </div>
+    );
+};
+
 export default function Index() {
-    const { jadwal, statusFilter } = usePage().props as any;
+    const { jadwal, statusFilter, rooms } = usePage().props as any;
     const [filter, setFilter] = useState(statusFilter);
 
     const [statusDropdown, setStatusDropdown] = useState<number | null>(null);
@@ -42,8 +183,11 @@ export default function Index() {
         jam_selesai: "",
         judul: "",
         keterangan: "",
-        lokasi: "",
+        lokasi: 1,
         status: "Belum",
+        gunakan_zoom: "no",
+        nama_pic: "",
+        nomor_pic: "",
     });
 
     // ✅ Step 1: Grouping berdasarkan tanggal
@@ -87,6 +231,8 @@ export default function Index() {
     const [selectedMinute, setSelectedMinute] = useState(0);
     const [ampm, setAmpm] = useState<"AM" | "PM">("AM");
     const [pickerStep, setPickerStep] = useState<"hour" | "minute">("hour");
+    const [bookedTimes, setBookedTimes] = useState<{ start: string; end: string; status: string }[]>([]);
+    const [bookedDates, setBookedDates] = useState<{ date: string; status: string }[]>([]);
 
     // Format tanggal ke Indonesia
     const formatDateIndo = (date: string | Date) => {
@@ -107,8 +253,11 @@ export default function Index() {
             jam_selesai: "",
             judul: "",
             keterangan: "",
-            lokasi: "",
+            lokasi: 1,
             status: "Belum",
+            gunakan_zoom: "no",
+            nama_pic: "",
+            nomor_pic: "",
         });
         setModalMode("add");
         setShowModal(true);
@@ -122,8 +271,11 @@ export default function Index() {
             jam_selesai: item.jam_selesai,
             judul: item.judul,
             keterangan: item.keterangan,
-            lokasi: item.lokasi,
+            lokasi: parseInt(item.lokasi),
             status: item.status,
+            gunakan_zoom: item.gunakan_zoom,
+            nama_pic: item.nama_pic || "",
+            nomor_pic: item.nomor_pic || "",
         });
         setModalMode("edit");
         setShowModal(true);
@@ -140,6 +292,9 @@ const handleSubmit = (e: React.FormEvent) => {
         keterangan: form.keterangan,
         lokasi: form.lokasi,
         status: form.status || "Belum",
+        gunakan_zoom: form.gunakan_zoom,
+        nama_pic: form.nama_pic,
+        nomor_pic: form.nomor_pic,
     };
 
     if (modalMode === "add") {
@@ -196,6 +351,91 @@ const handleSubmit = (e: React.FormEvent) => {
         const formattedHour = hourNum % 12 || 12;
         return `${String(formattedHour).padStart(2, "0")}:${minute} ${ampm}`;
     };
+
+    const fetchBookedTimes = async (tanggal: Date, lokasi: number, excludeId?: number) => {
+        try {
+            const url = `/jadwal-rapat/booked-times?tanggal=${tanggal.toISOString().split('T')[0]}&lokasi=${lokasi}&exclude_id=${excludeId || ''}`;
+            console.log('Fetching booked times:', url);
+            const response = await fetch(url);
+            const data = await response.json();
+            console.log('Booked times data:', data);
+            setBookedTimes(data.booked || []);
+        } catch (error) {
+            console.error('Failed to fetch booked times:', error);
+            setBookedTimes([]);
+        }
+    };
+
+    const fetchBookedDates = async (month: string, lokasi: number) => {
+        try {
+            const url = `/jadwal-rapat/booked-dates?month=${month}&lokasi=${lokasi}`;
+            console.log('Fetching booked dates:', url);
+            const response = await fetch(url);
+            const data = await response.json();
+            console.log('Booked dates data:', data);
+            setBookedDates(data.booked || []);
+        } catch (error) {
+            console.error('Failed to fetch booked dates:', error);
+            setBookedDates([]);
+        }
+    };
+
+    const isTimeBooked = (hour24: number, minute: number) => {
+        const time = `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
+        const booked = bookedTimes.some(({ start, end }) => time >= start && time < end);
+        console.log(`Checking if ${time} is booked:`, booked);
+        return booked;
+    };
+
+    const isHourBooked = (hour: number) => {
+        const hour24 = ampm === 'AM' ? (hour === 12 ? 0 : hour) : (hour === 12 ? 12 : hour + 12);
+        console.log(`Checking if hour ${hour} (${hour24}) is booked`);
+        for (let min = 0; min < 60; min += 5) {
+            if (isTimeBooked(hour24, min)) return true;
+        }
+        return false;
+    };
+
+    const isMinuteBooked = (minute: number) => {
+        const hour24 = ampm === 'AM' ? (selectedHour === 12 ? 0 : selectedHour) : (selectedHour === 12 ? 12 : selectedHour + 12);
+        console.log(`Checking if minute ${minute} for hour ${selectedHour} (${hour24}) is booked`);
+        return isTimeBooked(hour24, minute);
+    };
+ 
+    const getTimeColor = (hour24: number, minute: number) => {
+        const time = `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
+        const overlapping = bookedTimes.find(({ start, end }) => time >= start && time < end) as { start: string; end: string; status: string } | undefined;
+        if (overlapping) {
+            if (overlapping.status === 'Belum') return '#dc2626'; // Red for not available
+            if (overlapping.status === 'Proses') return '#eab308'; // Yellow for booked
+            return '#dc2626'; // Default to red
+        }
+        
+        return '#16a34a'; // Green for available
+    };
+
+    const getDateColor = (date: Date) => {
+        const dateStr = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        const bookingsOnDate = bookedDates.filter(booking => booking.date === dateStr);
+        
+        if (bookingsOnDate.length === 0) {
+            return '#16a34a'; // Green: No bookings
+        }
+        
+        // Check for "Belum" status (highest priority)
+        if (bookingsOnDate.some(booking => booking.status === 'Belum')) {
+            return '#dc2626'; // Red: Has unstarted bookings
+        }
+        
+        // Check for "Proses" status
+        if (bookingsOnDate.some(booking => booking.status === 'Proses')) {
+            return '#eab308'; // Yellow: Has ongoing bookings
+        }
+        
+        // Default: All "Selesai" or other statuses
+        return '#16a34a'; // Green: Available or completed
+    };
+
     const changeStatus = (
         id: number,
         newStatus: "Belum" | "Proses" | "Selesai"
@@ -258,25 +498,36 @@ const handleSubmit = (e: React.FormEvent) => {
                     <table className="min-w-full text-xs md:text-sm text-gray-700 border border-gray-300 border-collapse">
                         <thead className="bg-[#0B3D91] text-white">
                             <tr>
-                                <th className="px-2 md:px-4 py-2 md:py-3 border text-center">
+                                <th className="px-1 md:px-2 py-2 md:py-3 border text-center">
                                     Tanggal
                                 </th>
-                                <th className="px-2 md:px-4 py-2 border">
+                                <th className="px-1 md:px-2 py-2 border">
                                     Pukul
                                 </th>
-                                <th className="px-2 md:px-4 py-2 border">
+                                <th className="px-1 md:px-2 py-2 border">
                                     Judul
                                 </th>
-                                <th className="px-2 md:px-4 py-2 border">
+                                <th className="px-1 md:px-2 py-2 border">
                                     Keterangan
                                 </th>
-                                <th className="px-2 md:px-4 py-2 border">
+                                <th className="px-1 md:px-2 py-2 border">
                                     Lokasi
                                 </th>
-                                <th className="px-2 md:px-4 py-2 text-center border">
+
+                                 <th className="w-24 px-1 md:px-2 py-2 border">
+                                    Gunakan Zoom
+                                </th>
+                                 <th className="px-1 md:px-2 py-2 border">
+                                    Nama PIC
+                                </th>
+                                <th className="px-1 md:px-2 py-2 border">
+                                    Nomor PIC
+                                </th>
+
+                                <th className="px-1 md:px-2 py-2 text-center border">
                                     Status
                                 </th>
-                                <th className="px-2 md:px-4 py-2 text-center border">
+                                <th className="px-1 md:px-2 py-2 text-center border">
                                     Aksi
                                 </th>
                             </tr>
@@ -302,30 +553,42 @@ const handleSubmit = (e: React.FormEvent) => {
                                     {row.indexDalamTanggal === 0 && (
                                         <td
                                             rowSpan={row.totalDalamTanggal}
-                                            className="px-4 py-2 text-center font-semibold border border-gray-300"
+                                            className="px-2 py-2 text-center font-semibold border border-gray-300"
                                         >
                                             {formatDateIndo(row.tanggal)}
                                         </td>
                                     )}
 
-                                    <td className="px-4 py-2 border border-gray-300">
+                                    <td className="px-1 py-2 border border-gray-300">
                                         {formatTime(row.data.jam_mulai)} –{" "}
                                         {formatTime(row.data.jam_selesai)}
                                     </td>
 
-                                    <td className="px-4 py-2 border border-gray-300">
+                                    <td className="px-1 py-2 border border-gray-300">
                                         {row.data.judul}
                                     </td>
 
-                                    <td className="px-4 py-2 border border-gray-300">
+                                    <td className="px-1 py-2 border border-gray-300">
                                         {row.data.keterangan || "-"}
                                     </td>
 
-                                    <td className="px-4 py-2 border border-gray-300">
-                                        {row.data.lokasi}
+                                    <td className="px-1 py-2 border border-gray-300">
+                                        {row.data.room?.name || 'Unknown'}
                                     </td>
 
-                                    <td className="px-4 py-2 text-center border border-gray-300 relative">
+                                    <td className="px-1 py-2 border border-gray-300">
+                                        {row.data.gunakan_zoom === 'yes' ? 'Ya' : 'Tidak'}
+                                    </td>
+
+                                    <td className="px-1 py-2 border border-gray-300">
+                                        {row.data.nama_pic || "-"}
+                                    </td>
+
+                                    <td className="px-1 py-2 border border-gray-300">
+                                        {row.data.nomor_pic || "-"}
+                                    </td>
+
+                                    <td className="px-1 py-2 text-center border border-gray-300 relative">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation(); // ✅ penting!
@@ -400,22 +663,22 @@ const handleSubmit = (e: React.FormEvent) => {
                                         >
                                             <FaEdit />
                                         </button>
-<button
-  onClick={() => {
-    if(confirm("Hapus jadwal ini?")) {
-      router.delete(`/jadwal-rapat/${row.data.id}`, {
-        onSuccess: () => {
-          toast.success("🗑️ Jadwal dihapus");
-          router.reload({ only: ["jadwal"] });
-        },
-        onError: () => toast.error("❌ Gagal menghapus"),
-      });
-    }
-  }}
-  className="text-red-500 hover:text-red-700"
->
-  <FaTrash />
-</button>
+                                        <button
+                                        onClick={() => {
+                                            if(confirm("Hapus jadwal ini?")) {
+                                            router.delete(`/jadwal-rapat/${row.data.id}`, {
+                                                onSuccess: () => {
+                                                toast.success("🗑️ Jadwal dihapus");
+                                                router.reload({ only: ["jadwal"] });
+                                                },
+                                                onError: () => toast.error("❌ Gagal menghapus"),
+                                            });
+                                            }
+                                        }}
+                                        className="text-red-500 hover:text-red-700"
+                                        >
+                                        <FaTrash />
+                                        </button>
 
                                     </td>
                                 </tr>
@@ -500,14 +763,14 @@ const handleSubmit = (e: React.FormEvent) => {
 
                         {/* Form */}
                         <form onSubmit={handleSubmit}>
-                            <div className="grid grid-cols-3 gap-5">
+                            <div className="grid grid-cols-3 gap-3">
                                 {/* tanggal */}
                                 <div className="col-span-1">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                                         Tanggal
                                     </label>
                                     <div className="relative">
-                                        <DatePicker
+                                        {/*<DatePicker
                                             selected={form.tanggal}
                                             onChange={(date: Date | null) =>
                                                 date &&
@@ -518,7 +781,22 @@ const handleSubmit = (e: React.FormEvent) => {
                                             }
                                             className="w-full border border-gray-300 rounded-md p-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
                                             dateFormat="yyyy-MM-dd"
-                                        />
+                                        />*/}
+
+                                    <CircularDatePicker
+                                            selectedDate={form.tanggal}
+                                            onDateChange={(date: Date) =>
+                                                setForm((prev) => ({
+                                                    ...prev,
+                                                    tanggal: date,
+                                                }))
+                                            }
+                                            lokasi={form.lokasi}
+                                            getDateColor={getDateColor}
+                                            fetchBookedDates={fetchBookedDates}
+                                            />
+                                        
+
                                         <FaCalendarAlt className="absolute right-3 top-3 text-[#0B3D91]" />
                                     </div>
                                 </div>
@@ -534,7 +812,9 @@ const handleSubmit = (e: React.FormEvent) => {
                                             value={form.jam_mulai || ""}
                                             placeholder="Pilih waktu"
                                             onClick={() => {
+                                                console.log('Opening time picker for jam_mulai', { tanggal: form.tanggal, lokasi: form.lokasi, modalMode });
                                                 setPickerTarget("jam_mulai");
+                                                fetchBookedTimes(form.tanggal, form.lokasi, modalMode === "edit" ? form.id : undefined);
                                                 setShowTimePicker(true);
                                             }}
                                             className="w-full border border-gray-300 rounded-md p-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#002D62]/50 cursor-pointer text-gray-800"
@@ -555,6 +835,7 @@ const handleSubmit = (e: React.FormEvent) => {
                                             placeholder="Pilih waktu"
                                             onClick={() => {
                                                 setPickerTarget("jam_selesai");
+                                                fetchBookedTimes(form.tanggal, form.lokasi, modalMode === "edit" ? form.id : undefined);
                                                 setShowTimePicker(true);
                                             }}
                                             className="w-full border border-gray-300 rounded-md p-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 cursor-pointer text-gray-800"
@@ -597,11 +878,11 @@ const handleSubmit = (e: React.FormEvent) => {
                                             })
                                         }
                                         className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
-                                        placeholder="Keterangan tambahan (opsional)"
+                                        placeholder="Keterangan tambahan (Wajib Hukumnya)"
                                     />
                                 </div>
 
-                                {/* lokasi */}
+                                {/* lokasi 
                                 <div className="col-span-3">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                                         Lokasi
@@ -619,24 +900,100 @@ const handleSubmit = (e: React.FormEvent) => {
                                         placeholder="Masukkan lokasi rapat"
                                     />
                                 </div>
+                                */}
 
-                                    {/* Lokasi Select Dropdown */}
-                                    <div className="col-span-3">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi</label>
-                                        <select
-                                            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
-                                            id="role"
-                                            name="role"
-                                            //value={formData.role}
-                                            //onChange={handleChange}
-                                            required
-                                        >
-                                            <option value=" ">Ruang 1</option>
-                                            <option value=" ">Ruang 2</option>
-                                            <option value=" ">Ruang 3</option>
-                                        </select>
-                                    </div>
+                                {/* Lokasi Select Dropdown */}
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi</label>
+                                    <select
+                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
+                                        value={form.lokasi}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                lokasi: parseInt(e.target.value),
+                                            })
+                                        }
+                                        required
+                                    >
+                                        {rooms.map((room: any) => (
+                                            <option key={room.room_code} value={room.room_code}>
+                                                {room.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
+                                {/* Zoom Select Dropdown */}
+                                <div className="col-span-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Gunakan Zoom</label>
+                                    <select
+                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
+                                        value={form.gunakan_zoom}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                gunakan_zoom: e.target.value as "yes" | "no",
+                                            })
+                                        }
+                                        required
+                                    >
+                                        <option value="yes">Ya</option>
+                                        <option value="no">Tidak</option>
+                                    </select>
+                                </div>
+
+                                
+
+                                {/* Nama PIC */}
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                        Nama PIC
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={form.nama_pic}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                nama_pic: e.target.value,
+                                            })
+                                        }
+                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
+                                        placeholder="Nama PIC"
+                                    />
+                                </div>
+
+                                {/* Nomor PIC */}
+                                <div className="col-span-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                        Nomor PIC
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={form.nomor_pic}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                nomor_pic: e.target.value,
+                                            })
+                                        }
+                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
+                                        placeholder="Nomor PIC"
+                                    />
+                                </div>
+
+                                
+
+                                
+
+                                
+
+                                
+
+                            
+
+                                    
                             </div>
 
                             {/* tombol */}
@@ -708,7 +1065,10 @@ const handleSubmit = (e: React.FormEvent) => {
                                                 color:
                                                     selectedHour === hour
                                                         ? "#00427c"
-                                                        : "#333",
+                                                        : (() => {
+                                                            const hour24 = ampm === 'AM' ? (hour === 12 ? 0 : hour) : (hour === 12 ? 12 : hour + 12);
+                                                            return getTimeColor(hour24, 0);
+                                                        })(),
                                                 fontSize: "1.1rem",
                                             }}
                                         >
@@ -743,7 +1103,10 @@ const handleSubmit = (e: React.FormEvent) => {
                                                 color:
                                                     selectedMinute === minute
                                                         ? "#00427c"
-                                                        : "#333",
+                                                        : (() => {
+                                                            const hour24 = ampm === 'AM' ? (selectedHour === 12 ? 0 : selectedHour) : (selectedHour === 12 ? 12 : selectedHour + 12);
+                                                            return getTimeColor(hour24, minute);
+                                                        })(),
                                                 fontSize: "1rem",
                                             }}
                                         >

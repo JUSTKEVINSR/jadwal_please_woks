@@ -129,7 +129,7 @@ export default function Login({
                             />
                             <h2 className="text-2xl font-bold">Selamat Datang</h2>
                             <p className="text-sm mt-1 opacity-90">
-                                Login hanya untuk admin
+                                Login hanya untuk staff
                             </p>
                         </div>
                     </div>

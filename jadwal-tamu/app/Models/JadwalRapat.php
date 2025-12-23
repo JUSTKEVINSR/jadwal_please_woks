@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\UserPlus;
+use App\Models\RoomMaster;
 
 class JadwalRapat extends Model
 {
@@ -22,6 +24,9 @@ class JadwalRapat extends Model
         'lokasi',
         'slug',
         'status',
+        'gunakan_zoom',
+        'nama_pic',
+        'nomor_pic',
     ];
 
     /**
@@ -32,6 +37,7 @@ class JadwalRapat extends Model
         'tanggal' => 'date:Y-m-d',
         'jam_mulai' => 'string',
         'jam_selesai' => 'string',
+        'lokasi' => 'integer',
     ];
 
     /**
@@ -39,6 +45,7 @@ class JadwalRapat extends Model
      */
     protected $attributes = [
         'status' => 'Belum',
+        'gunakan_zoom' => 'no',
     ];
 
     /**
@@ -46,7 +53,15 @@ class JadwalRapat extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(UserPlus::class);
+    }
+
+    /**
+     * Relasi: Jadwal rapat memiliki lokasi dari room_master.
+     */
+    public function room()
+    {
+        return $this->belongsTo(RoomMaster::class, 'lokasi', 'room_code');
     }
 
     /**

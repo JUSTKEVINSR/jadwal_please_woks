@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\UserPlus;
 
 class DaftarTamu extends Model
 {
@@ -21,6 +22,7 @@ class DaftarTamu extends Model
         'tanggal_kunjungan',
         'jam_mulai',
         'jam_selesai',
+        'user_id',
     ];
 
     // Cast otomatis
@@ -40,11 +42,11 @@ class DaftarTamu extends Model
     }
 
     /**
-     * (Opsional) Relasi ke tabel users
+     * (Opsional) Relasi ke tabel users_plus
      * Jika nanti ingin tahu siapa yang input tamu
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(UserPlus::class);
     }
 }

@@ -14,11 +14,8 @@ return new class extends Migration
         Schema::create('jadwal_rapats', function (Blueprint $table) {
             $table->id();
 
-            // Relasi ke tabel users
-            $table->foreignId('user_id')
-                ->constrained()
-                ->cascadeOnDelete()
-                ->cascadeOnUpdate();
+            // Relasi ke tabel users_plus (foreign key akan ditambahkan di migration terpisah)
+            $table->unsignedBigInteger('user_id');
 
             // Detail jadwal
             $table->date('tanggal')->index(); // 🔹 index untuk performa

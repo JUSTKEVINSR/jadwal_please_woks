@@ -59,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/jadwal', [JadwalRapatApiController::class, 'store']);
     Route::put('/jadwal/{jadwal}', [JadwalRapatApiController::class, 'update']);
     Route::delete('/jadwal/{jadwal}', [JadwalRapatApiController::class, 'destroy']);
+    Route::get('/jadwal/booked-dates', [JadwalRapatApiController::class, 'bookedDates']);
+    Route::get('/jadwal/available-slots', [JadwalRapatApiController::class, 'availableSlots']);
 
     // DAFTAR TAMU
     Route::get('/tamu', [DaftarTamuApiController::class, 'index']);

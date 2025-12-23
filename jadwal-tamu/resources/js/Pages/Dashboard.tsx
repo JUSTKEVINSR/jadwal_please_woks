@@ -23,7 +23,7 @@ export default function Dashboard() {
           <div className="bg-[#B0DAFF] p-7 rounded-2xl shadow-md border border-[#7FB8E5]">
             <div className="p-6 text-blue-900">
               <h1 className="text-2xl font-bold mb-2">
-                Selamat vDatang, {auth?.user?.name ?? 'User'} 🎉
+                Selamat Datang, {auth?.user?.name ?? 'User'} 🎉
               </h1>
               <p className="text-gray-600 mb-6">
                 Ini adalah halaman Dashboard kamu. 

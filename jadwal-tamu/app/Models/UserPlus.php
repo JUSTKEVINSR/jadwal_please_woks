@@ -20,6 +20,10 @@ class UserPlus extends Authenticatable
         'role_code',
     ];
 
+    protected $appends = [
+        'role',
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -31,6 +35,11 @@ class UserPlus extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getRoleAttribute(): string
+    {
+        return $this->role_code === 1945 ? 'admin' : 'user';
     }
 
     public function isAdmin(): bool

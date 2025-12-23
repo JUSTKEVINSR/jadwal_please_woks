@@ -11,6 +11,7 @@ interface Jadwal {
     lokasi: string;
     keterangan?: string;
     status: string;
+    gunakan_zoom: string;
 }
 
 interface Video {
@@ -198,7 +199,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                     INSPEKTORAT JENDERAL
                                 </h1>
                                 <p className="text-blue-200 text-xs md:text-sm font-medium">
-                                    Kementerian Dalam Negeri RI edos
+                                    Kementerian Dalam Negeri RI 
                                 </p>
                             </div>
                         </div>

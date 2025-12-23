@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\UserPlus;
 
 class Video extends Model
 {
@@ -25,6 +26,6 @@ class Video extends Model
     // ✅ Relasi ke user
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(UserPlus::class);
     }
 }

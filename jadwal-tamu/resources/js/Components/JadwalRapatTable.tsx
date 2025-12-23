@@ -8,6 +8,7 @@ interface JadwalItem {
   lokasi: string;
   keterangan?: string;
   status: string;
+  gunakan_zoom: string;
 }
 
 interface Props {
@@ -260,6 +261,7 @@ interface Props {
             <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-pukul p-1' : 'p-1.5 md:p-2 w-[110px] md:w-[130px]'}`}>Pukul</th>
             <th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2'}`}>Judul</th>
             <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-lokasi p-1' : 'p-1.5 md:p-2 w-[90px] md:w-[110px]'}`}>Lokasi</th>
+            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Gunakan Zoom</th>*/}
             <th className={`border ${deviceType === 'mobile' ? 'mobile-col-keterangan p-1' : 'p-1.5 md:p-2'}`}>Keterangan</th>
             <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-status p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Status</th>
           </tr>
@@ -335,6 +337,19 @@ interface Props {
                     <ScrollingText text={row.data.lokasi} maxLength={deviceType === 'mobile' ? 8 : 15} />
                   </div>
                 </td>
+
+                {/* GUNAKAN ZOOM 
+                <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
+                  <span className={`px-1.5 rounded-full font-semibold whitespace-nowrap ${
+                    deviceType === 'mobile' ? 'py-0.5 text-[8px]' : 'py-0.5 md:py-1 text-[10px] md:text-xs'
+                  } ${
+                    row.data.gunakan_zoom === "yes"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-300 text-gray-800"
+                  }`}>
+                    {row.data.gunakan_zoom === "yes" ? "Ya" : "Tidak"}
+                  </span>
+                </td>*/}
 
                 {/* KETERANGAN - dengan scrolling text */}
                 <td className={`border ${deviceType === 'mobile' ? 'p-1 max-w-[130px]' : 'p-1.5 md:p-2 max-w-[180px] md:max-w-[250px]'}`}>

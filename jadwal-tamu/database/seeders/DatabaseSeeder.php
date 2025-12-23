@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(UsersSeeder::class);
         $this->call(RoleMasterSeeder::class);
+        $this->call(RoomMasterSeeder::class);
         $this->call(UsersPlusSeeder::class);
     }
 }
