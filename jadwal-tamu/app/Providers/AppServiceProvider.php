@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\JadwalRapat;
+use App\Observers\JadwalRapatObserver;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -34,5 +36,8 @@ class AppServiceProvider extends ServiceProvider
                 'user' => auth()->user(),
             ],
         ]);
+
+        // Register JadwalRapat Observer
+        JadwalRapat::observe(JadwalRapatObserver::class);
     }
 }

@@ -434,6 +434,62 @@ const handleSubmit = (e: React.FormEvent) => {
         fetchBookedDates(currentMonth, form.lokasi);
     }, [form.lokasi, form.tanggal, modalMode, form.id]);
 
+    // Real-time updates for jadwal rapat table
+    useEffect(() => {
+        console.log('🔌 JadwalRapat: Setting up broadcasting listeners...');
+        
+        if (typeof window !== 'undefined' && window.Echo) {
+            console.log('✅ JadwalRapat: Echo is available');
+            const channel = window.Echo.channel('public-jadwal-rapat');
+            console.log('📡 JadwalRapat: Created channel:', channel);
+            
+            // Add connection debugging
+            channel.on('pusher:subscription_succeeded', (members) => {
+                console.log('🎉 JadwalRapat: Successfully subscribed to channel', members);
+            });
+            
+            channel.on('pusher:subscription_error', (status) => {
+                console.error('❌ JadwalRapat: Subscription error', status);
+            });
+            
+            channel.on('pusher:ping', () => {
+                console.log('🏓 JadwalRapat: Ping received');
+            });
+            
+            channel.listen('jadwal-rapat.created', (data: any) => {
+                console.log('🎉 JadwalRapat: New jadwal created:', data);
+                toast.success(data.message || 'Jadwal rapat baru telah ditambahkan');
+                // Reload the jadwal data to show new entry
+                router.reload({ only: ["jadwal"] });
+            });
+            
+            channel.listen('jadwal-rapat.updated', (data: any) => {
+                console.log('🔄 JadwalRapat: Jadwal updated:', data);
+                toast.info(data.message || 'Jadwal rapat telah diperbarui');
+                // Reload the jadwal data to reflect changes
+                router.reload({ only: ["jadwal"] });
+            });
+            
+            channel.listen('jadwal-rapat.deleted', (data: any) => {
+                console.log('🗑️ JadwalRapat: Jadwal deleted:', data);
+                toast.info(data.message || 'Jadwal rapat telah dihapus');
+                // Reload the jadwal data to remove deleted entry
+                router.reload({ only: ["jadwal"] });
+            });
+
+            console.log('✅ JadwalRapat: Broadcasting listeners set up successfully');
+
+            return () => {
+                console.log('🧹 JadwalRapat: Cleaning up broadcasting listeners');
+                channel.stopListening('jadwal-rapat.created');
+                channel.stopListening('jadwal-rapat.updated');
+                channel.stopListening('jadwal-rapat.deleted');
+            };
+        } else {
+            console.error('❌ JadwalRapat: Echo is not available');
+        }
+    }, []);
+
     const isHourBooked = (hour: number) => {
         const hour24 = ampm === 'AM' ? (hour === 12 ? 0 : hour) : (hour === 12 ? 12 : hour + 12);
         console.log(`Checking if hour ${hour} (${hour24}) is booked`);

@@ -2,6 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Head, Link, usePage } from "@inertiajs/react";
 import JadwalRapatTable from "@/Components/JadwalRapatTable";
 
+// Import Laravel Echo for real-time updates
+declare global {
+    interface Window {
+        Echo: any;
+    }
+}
+
 interface Jadwal {
     id: number;
     tanggal: string;
@@ -36,6 +43,51 @@ export default function Home({ canLogin, jadwal, video }: Props) {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
+    const [jadwalData, setJadwalData] = useState<Jadwal[]>(jadwal);
+
+    // Real-time updates for jadwal
+    useEffect(() => {
+        console.log('Home: Setting up Echo listeners...', { 
+            hasEcho: !!window.Echo, 
+            echoAvailable: window.Echo 
+        });
+        
+        if (window.Echo) {
+            console.log('Home: Connecting to public-jadwal-rapat channel...');
+            const channel = window.Echo.channel('public-jadwal-rapat');
+            
+            channel.listen('jadwal-rapat.created', (data: any) => {
+                console.log('Home: New jadwal created:', data);
+                setJadwalData(prev => [...prev, data.jadwal_rapat]);
+            });
+            
+            channel.listen('jadwal-rapat.updated', (data: any) => {
+                console.log('Home: Jadwal updated:', data);
+                setJadwalData(prev => 
+                    prev.map(item => 
+                        item.id === data.jadwal_rapat.id ? data.jadwal_rapat : item
+                    )
+                );
+            });
+            
+            channel.listen('jadwal-rapat.deleted', (data: any) => {
+                console.log('Home: Jadwal deleted:', data);
+                setJadwalData(prev => 
+                    prev.filter(item => item.id !== data.jadwal_rapat_id)
+                );
+            });
+
+            console.log('Home: Echo listeners set up successfully');
+
+            return () => {
+                channel.stopListening('jadwal-rapat.created');
+                channel.stopListening('jadwal-rapat.updated');
+                channel.stopListening('jadwal-rapat.deleted');
+            };
+        } else {
+            console.error('Home: window.Echo is not available!');
+        }
+    }, []);
 
     // ✅ Deteksi device type
     useEffect(() => {
@@ -279,7 +331,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                             <div className={`rounded-xl bg-blue shadow-inner ${canScroll ? 'overflow-visible' : 'flex-1 overflow-hidden min-h-0'}`}>
                                 <div className={`${canScroll ? 'overflow-visible' : 'h-full overflow-hidden'}`}>
                                     <JadwalRapatTable
-                                        jadwal={jadwal.filter(item => 
+                                        jadwal={jadwalData.filter(item => 
                                             item.kasubak === 'approve' &&
                                             item.ula === 'approve'
 
