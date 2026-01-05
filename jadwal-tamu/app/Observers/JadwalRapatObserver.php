@@ -24,6 +24,6 @@ class JadwalRapatObserver
     public function deleted(JadwalRapat $jadwalRapat)
     {
         \Log::info('JadwalRapatObserver: Deleted event triggered', ['id' => $jadwalRapat->id]);
-        event(new JadwalRapatDeleted($jadwalRapat));
+        event(new JadwalRapatDeleted($jadwalRapat->id));
     }
 }

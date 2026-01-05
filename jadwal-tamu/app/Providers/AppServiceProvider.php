@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\JadwalRapat;
 use App\Observers\JadwalRapatObserver;
+use App\Models\Video;
+use App\Observers\VideoObserver;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -32,12 +34,15 @@ class AppServiceProvider extends ServiceProvider
         Vite::prefetch(concurrency: 3);
 
         Inertia::share([
-            'auth' => fn () => [
+            'auth' => fn() => [
                 'user' => auth()->user(),
             ],
         ]);
 
         // Register JadwalRapat Observer
         JadwalRapat::observe(JadwalRapatObserver::class);
+
+        // Register Video Observer
+        Video::observe(VideoObserver::class);
     }
 }

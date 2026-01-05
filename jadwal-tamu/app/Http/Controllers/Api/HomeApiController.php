@@ -18,17 +18,21 @@ class HomeApiController extends Controller
             ->get();
 
         // Video aktif
-        $video = Video::select('id', 'judul', 'path')
+        $video = Video::select('id', 'judul', 'path', 'source_type')
             ->where('status', 'aktif')
             ->latest()
             ->first();
 
         if ($video && $video->path) {
-            $video->signed_url = URL::temporarySignedRoute(
-                'video.stream',
-                now()->addHours(6),
-                ['video' => $video->id]
-            );
+            if ($video->source_type === 'local') {
+                $video->signed_url = URL::temporarySignedRoute(
+                    'video.stream',
+                    now()->addHours(6),
+                    ['video' => $video->id]
+                );
+            } else {
+                $video->signed_url = $video->path;
+            }
         }
 
         return response()->json([

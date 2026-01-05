@@ -12,7 +12,7 @@ Broadcast::channel('jadwal-rapat', function ($user) {
         'user_authenticated' => auth()->check(),
         'channel' => 'jadwal-rapat'
     ]);
-    
+
     // For testing, allow all users (authenticated or not)
     // In production, you might want to restrict to authenticated users only
     return true;
@@ -21,4 +21,8 @@ Broadcast::channel('jadwal-rapat', function ($user) {
 // Also create a public channel for testing
 Broadcast::channel('public-jadwal-rapat', function () {
     return true; // Allow everyone to listen
+});
+
+Broadcast::channel('public-videos', function () {
+    return true;
 });

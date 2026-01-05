@@ -9,20 +9,20 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
+
 
 class JadwalRapatDeleted implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets;
 
-    public $jadwalRapat;
+    public $id;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(JadwalRapat $jadwalRapat)
+    public function __construct(int $id)
     {
-        $this->jadwalRapat = $jadwalRapat;
+        $this->id = $id;
     }
 
     /**
@@ -49,7 +49,7 @@ class JadwalRapatDeleted implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'jadwal_rapat_id' => $this->jadwalRapat->id,
+            'jadwal_rapat_id' => $this->id,
             'message' => 'Jadwal rapat telah dihapus realtime'
         ];
     }

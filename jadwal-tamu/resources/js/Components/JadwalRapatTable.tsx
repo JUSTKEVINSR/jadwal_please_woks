@@ -22,7 +22,7 @@ interface Props {
   visibleLimit?: number; // optional: limit how many rows to render (e.g., top 5)
 }
 
-  const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 'desktop', visibleLimit }) => {
+const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 'desktop', visibleLimit }) => {
   // ✅ Sesuaikan rows per page berdasarkan device
   const getMaxRows = () => {
     if (deviceType === 'mobile') return 20; // Mobile bisa scroll, tampilkan semua
@@ -115,7 +115,7 @@ interface Props {
   // ✅ Auto pagination - hanya untuk desktop & TV (tidak untuk mobile)
   useEffect(() => {
     if (pages.length <= 1 || deviceType === 'mobile') return;
-    
+
     const interval = setInterval(() => {
       setPage((prev) => (prev + 1) % pages.length);
     }, 10000);
@@ -130,16 +130,16 @@ interface Props {
   }, [page, pages.length, onPageChange]);
 
   // ✅ Untuk mobile tampilkan semua data (bisa scroll), untuk yang lain pagination
-  const displayRows = deviceType === 'mobile' 
+  const displayRows = deviceType === 'mobile'
     ? flatRows.map((row, idx) => {
-        const firstIndex = flatRows.findIndex((r) => r.tanggal === row.tanggal);
-        const sameDate = flatRows.filter((r) => r.tanggal === row.tanggal);
-        return {
-          ...row,
-          isFirstOfDate: idx === firstIndex,
-          tanggalCountInPage: sameDate.length,
-        };
-      })
+      const firstIndex = flatRows.findIndex((r) => r.tanggal === row.tanggal);
+      const sameDate = flatRows.filter((r) => r.tanggal === row.tanggal);
+      return {
+        ...row,
+        isFirstOfDate: idx === firstIndex,
+        tanggalCountInPage: sameDate.length,
+      };
+    })
     : pages[page] || [];
 
 
@@ -161,9 +161,9 @@ interface Props {
   const rowsToRender = flatRows.slice(startIdx, startIdx + VISIBLE_LIMIT);
 
   // Component untuk teks berjalan
-  const ScrollingText: React.FC<{ text: string; maxLength?: number }> = ({ 
-    text, 
-    maxLength = 50 
+  const ScrollingText: React.FC<{ text: string; maxLength?: number }> = ({
+    text,
+    maxLength = 50
   }) => {
     const isLong = text.length > maxLength;
 
@@ -263,44 +263,43 @@ interface Props {
             Upcoming Meetings
           </h2>
 
-          </div>
+        </div>
 
-        <table className={`min-w-full border border-gray-300 text-black bg-white rounded-xl overflow-hidden ${
-          deviceType === 'mobile' ? 'mobile-table' : getTVTextSize("text-xs md:text-sm")
-        }`}>
-          
-        <thead className={getTVTextSize("bg-[#0B3D91] text-white text-sm md:text-base")}>
-          <tr>
-            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-no p-1' : 'p-1.5 md:p-2 w-[40px] md:w-[50px]'}`}>No</th> */}
-            {/* <th className={`border ${deviceType === 'mobile' ? 'mobile-col-tanggal p-1' : 'p-1.5 md:p-2 w-[160px] md:w-[200px]'}`}>Tanggal</th> */}
-            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-pukul p-1' : 'p-1.5 md:p-2 w-[110px] md:w-[130px]'}`}>Pukul</th>*/}
-            {/*<th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2'}`}>Judul</th>*/}
-            {/*th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2 w-[200px] md:w-[380px]'}`}>AGENDA</th>*/}
-            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-lokasi p-1' : 'p-1.5 md:p-2 w-[90px] md:w-[110px]'}`}>Lokasi</th>*/}
-            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Gunakan Zoom</th>*/}
-            {/*<th className={`border ${deviceType === 'mobile' ? 'mobile-col-keterangan p-1' : 'p-1.5 md:p-2'}`}>Keterangan</th>*/}
-            {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-status p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Status</th>*/}
-          </tr>
-        </thead>
+        <table className={`min-w-full border border-gray-300 text-black bg-white rounded-xl overflow-hidden ${deviceType === 'mobile' ? 'mobile-table' : getTVTextSize("text-xs md:text-sm")
+          }`}>
 
-        <tbody>
-          {rowsToRender.map((row, idx) => {
-            // Sequential numbering: global index in flatRows
-            const no = startIdx + idx + 1;
-            
-            // ✅ Fixed height untuk setiap row
-            const rowHeight = deviceType === 'mobile' ? '50px' : deviceType === 'tv-small' ? '55px' : deviceType === 'tv-large' ? '60px' : '55px';
+          <thead className={getTVTextSize("bg-[#0B3D91] text-white text-sm md:text-base")}>
+            <tr>
+              {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-no p-1' : 'p-1.5 md:p-2 w-[40px] md:w-[50px]'}`}>No</th> */}
+              {/* <th className={`border ${deviceType === 'mobile' ? 'mobile-col-tanggal p-1' : 'p-1.5 md:p-2 w-[160px] md:w-[200px]'}`}>Tanggal</th> */}
+              {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-pukul p-1' : 'p-1.5 md:p-2 w-[110px] md:w-[130px]'}`}>Pukul</th>*/}
+              {/*<th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2'}`}>Judul</th>*/}
+              {/*th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2 w-[200px] md:w-[380px]'}`}>AGENDA</th>*/}
+              {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-lokasi p-1' : 'p-1.5 md:p-2 w-[90px] md:w-[110px]'}`}>Lokasi</th>*/}
+              {/*<th className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Gunakan Zoom</th>*/}
+              {/*<th className={`border ${deviceType === 'mobile' ? 'mobile-col-keterangan p-1' : 'p-1.5 md:p-2'}`}>Keterangan</th>*/}
+              {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-status p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Status</th>*/}
+            </tr>
+          </thead>
 
-            return (
-              
-              <tr 
-                key={`${row.tanggal}-${idx}`} 
-                className="hover:bg-gray-50"
-                style={{ height: rowHeight }}
-              >
-                {/*<td>{no}</td> ROWS */}
+          <tbody>
+            {rowsToRender.map((row, idx) => {
+              // Sequential numbering: global index in flatRows
+              const no = startIdx + idx + 1;
 
-                {/* {row.isFirstOfDate && (
+              // ✅ Fixed height untuk setiap row
+              const rowHeight = deviceType === 'mobile' ? '50px' : deviceType === 'tv-small' ? '55px' : deviceType === 'tv-large' ? '60px' : '55px';
+
+              return (
+
+                <tr
+                  key={`${row.tanggal}-${idx}`}
+                  className="hover:bg-gray-50"
+                  style={{ height: rowHeight }}
+                >
+                  {/*<td>{no}</td> ROWS */}
+
+                  {/* {row.isFirstOfDate && (
                   <>
                     <td
                       rowSpan={row.tanggalCountInPage}
@@ -333,34 +332,32 @@ interface Props {
                   </>
                 )} */}
 
-                <td className={`border text-center font-semibold text-[#002D62] whitespace-nowrap ${
-                  deviceType === 'mobile' ? 'p-1 text-[9px]' : 'p-1.5 md:p-2 text-[10px] md:text-xs'
-                }`}>
-                  {formatTime(row.data.jam_mulai)} – {formatTime(row.data.jam_selesai)}
-                </td>
+                  <td className={`border text-center font-semibold text-[#002D62] whitespace-nowrap ${deviceType === 'mobile' ? 'p-1 text-[9px]' : 'p-1.5 md:p-2 text-[10px] md:text-xs'
+                    }`}>
+                    {formatTime(row.data.jam_mulai)} – {formatTime(row.data.jam_selesai)}
+                  </td>
 
-                {/* JUDUL - dengan scrolling text */}
-                <td className={`border ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
-                  <div className={`overflow-hidden whitespace-nowrap ${
-                    deviceType === 'mobile' ? 'w-[140px]' : 'w-[180px] md:w-[180px]'
-                  }`}>
-                    <ScrollingText text={row.data.judul} maxLength={deviceType === 'mobile' ? 15 : 25} />
-                  </div>
+                  {/* JUDUL - dengan scrolling text */}
+                  <td className={`border ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
+                    <div className={`overflow-hidden whitespace-nowrap ${deviceType === 'mobile' ? 'w-[140px]' : 'w-[180px] md:w-[180px]'
+                      }`}>
+                      <ScrollingText text={row.data.judul} maxLength={deviceType === 'mobile' ? 15 : 25} />
+                    </div>
 
-                  {/* LOKASI - dengan scrolling text */}
-                  <div className={deviceType === 'mobile' ? 'text-[9px]' : 'text-xs md:text-sm'}>
-                    <ScrollingText text={row.data.room?.name || row.data.lokasi} maxLength={deviceType === 'mobile' ? 8 : 15} />
-                  </div>
-                </td>
+                    {/* LOKASI - dengan scrolling text */}
+                    <div className={`overflow-hidden whitespace-nowrap ${deviceType === 'mobile' ? 'text-[9px]' : 'text-xs md:text-sm'}`}>
+                      <ScrollingText text={row.data.room?.name || row.data.lokasi} maxLength={deviceType === 'mobile' ? 8 : 15} />
+                    </div>
+                  </td>
 
-                {/* LOKASI - dengan scrolling text 
+                  {/* LOKASI - dengan scrolling text 
                 <td className={`border text-center ${deviceType === 'mobile' ? 'p-1 max-w-[70px]' : 'p-1.5 md:p-2 max-w-[90px] md:max-w-[110px]'}`}>
                   <div className={deviceType === 'mobile' ? 'text-[9px]' : 'text-xs md:text-sm'}>
                     <ScrollingText text={row.data.lokasi} maxLength={deviceType === 'mobile' ? 8 : 15} />
                   </div>
                 </td>*/}
 
-                {/* GUNAKAN ZOOM 
+                  {/* GUNAKAN ZOOM 
                 <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
                   <span className={`px-1.5 rounded-full font-semibold whitespace-nowrap ${
                     deviceType === 'mobile' ? 'py-0.5 text-[8px]' : 'py-0.5 md:py-1 text-[10px] md:text-xs'
@@ -373,14 +370,14 @@ interface Props {
                   </span>
                 </td>*/}
 
-                {/* KETERANGAN - dengan scrolling text 
+                  {/* KETERANGAN - dengan scrolling text 
                 <td className={`border ${deviceType === 'mobile' ? 'p-1 max-w-[130px]' : 'p-1.5 md:p-2 max-w-[180px] md:max-w-[250px]'}`}>
                   <div className={`leading-snug ${deviceType === 'mobile' ? 'text-[9px]' : 'text-xs md:text-sm'}`}>
                     <ScrollingText text={row.data.keterangan || "-"} maxLength={deviceType === 'mobile' ? 15 : 30} />
                   </div>
                 </td>*/}
 
-                {/* STATUS 
+                  {/* STATUS 
                 <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
                   <span
                     className={`px-1.5 rounded-full font-semibold whitespace-nowrap ${
@@ -396,11 +393,11 @@ interface Props {
                     {row.data.status}
                   </span>
                 </td>*/}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );

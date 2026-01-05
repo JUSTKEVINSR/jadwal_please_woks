@@ -15,6 +15,7 @@ class Video extends Model
         'judul',
         'durasi',
         'status',
+        'source_type',
         'path',
         'user_id',
         'token',

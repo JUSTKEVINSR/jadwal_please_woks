@@ -17,26 +17,33 @@ class HomeController extends Controller
             ->orderBy('tanggal', 'asc')
             ->orderBy('jam_mulai', 'asc')
             ->whereDate('tanggal', Carbon::today())
-            
+
             ->get();
 
         // ✅ Ambil video aktif
-        $videoAktif = Video::select('id', 'judul', 'path')
+        $videoAktif = Video::select('id', 'judul', 'path', 'source_type')
             ->where('status', 'aktif')
             ->latest()
             ->first();
 
-        // ✅ Generate signed URL (valid 6 jam, auto-refresh setiap page load)
+        // ✅ Generate URL (signed route for local, direct path for youtube)
         $videoData = null;
         if ($videoAktif && $videoAktif->path) {
+            $url = $videoAktif->path; // Default to path (for youtube)
+
+            if ($videoAktif->source_type === 'local') {
+                $url = URL::temporarySignedRoute(
+                    'video.stream',
+                    now()->addHours(6),
+                    ['video' => $videoAktif->id]
+                );
+            }
+
             $videoData = [
                 'id' => $videoAktif->id,
                 'judul' => $videoAktif->judul,
-                'url' => URL::temporarySignedRoute(
-                    'video.stream',
-                    now()->addHours(6), // Valid 6 jam
-                    ['video' => $videoAktif->id]
-                ),
+                'source_type' => $videoAktif->source_type,
+                'url' => $url,
             ];
         }
 

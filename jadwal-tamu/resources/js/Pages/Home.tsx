@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Head, Link, usePage } from "@inertiajs/react";
+import { Head, Link, usePage, router } from "@inertiajs/react";
 import JadwalRapatTable from "@/Components/JadwalRapatTable";
 
 // Import Laravel Echo for real-time updates
@@ -26,7 +26,8 @@ interface Jadwal {
 interface Video {
     id: number;
     judul: string;
-    url: string; // ✅ Signed URL dari backend
+    url: string; // ✅ URL dari backend (signed atau direct youtube)
+    source_type: 'local' | 'youtube';
 }
 
 interface Props {
@@ -47,42 +48,59 @@ export default function Home({ canLogin, jadwal, video }: Props) {
 
     // Real-time updates for jadwal
     useEffect(() => {
-        console.log('Home: Setting up Echo listeners...', { 
-            hasEcho: !!window.Echo, 
-            echoAvailable: window.Echo 
+        console.log('Home: Setting up Echo listeners...', {
+            hasEcho: !!window.Echo,
+            echoAvailable: window.Echo
         });
-        
+
         if (window.Echo) {
             console.log('Home: Connecting to public-jadwal-rapat channel...');
             const channel = window.Echo.channel('public-jadwal-rapat');
-            
-            channel.listen('jadwal-rapat.created', (data: any) => {
+
+            channel.listen('.jadwal-rapat.created', (data: any) => {
                 console.log('Home: New jadwal created:', data);
                 setJadwalData(prev => [...prev, data.jadwal_rapat]);
             });
-            
-            channel.listen('jadwal-rapat.updated', (data: any) => {
+
+            channel.listen('.jadwal-rapat.updated', (data: any) => {
                 console.log('Home: Jadwal updated:', data);
-                setJadwalData(prev => 
-                    prev.map(item => 
+                setJadwalData(prev =>
+                    prev.map(item =>
                         item.id === data.jadwal_rapat.id ? data.jadwal_rapat : item
                     )
                 );
             });
-            
-            channel.listen('jadwal-rapat.deleted', (data: any) => {
+
+            channel.listen('.jadwal-rapat.deleted', (data: any) => {
                 console.log('Home: Jadwal deleted:', data);
-                setJadwalData(prev => 
+                setJadwalData(prev =>
                     prev.filter(item => item.id !== data.jadwal_rapat_id)
                 );
             });
 
+            // Video Channel
+            console.log('Home: Connecting to public-videos channel...');
+            const videoChannel = window.Echo.channel('public-videos');
+
+            const handleVideoUpdate = (data: any) => {
+                console.log('Home: Video update detected:', data);
+                router.reload({ only: ['video'] });
+            };
+
+            videoChannel.listen('.video.created', handleVideoUpdate);
+            videoChannel.listen('.video.updated', handleVideoUpdate);
+            videoChannel.listen('.video.deleted', handleVideoUpdate);
+
             console.log('Home: Echo listeners set up successfully');
 
             return () => {
-                channel.stopListening('jadwal-rapat.created');
-                channel.stopListening('jadwal-rapat.updated');
-                channel.stopListening('jadwal-rapat.deleted');
+                channel.stopListening('.jadwal-rapat.created');
+                channel.stopListening('.jadwal-rapat.updated');
+                channel.stopListening('.jadwal-rapat.deleted');
+
+                videoChannel.stopListening('.video.created');
+                videoChannel.stopListening('.video.updated');
+                videoChannel.stopListening('.video.deleted');
             };
         } else {
             console.error('Home: window.Echo is not available!');
@@ -95,13 +113,13 @@ export default function Home({ canLogin, jadwal, video }: Props) {
             const width = window.innerWidth;
             const height = window.innerHeight;
             const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            
+
             // Mobile Detection (phone & tablet dengan touch)
             if (width < 1024 && isTouchDevice) {
                 setDeviceType('mobile');
                 return;
             }
-            
+
             // TV Detection berdasarkan ukuran layar
             if (!isTouchDevice && height >= 720) {
                 // TV kecil (20"-32" biasanya 720p-1080p, width 1280-1920)
@@ -115,7 +133,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                     return;
                 }
             }
-            
+
             // Default Desktop
             setDeviceType('desktop');
         };
@@ -167,6 +185,23 @@ export default function Home({ canLogin, jadwal, video }: Props) {
     const hour = time.getHours().toString().padStart(2, "0");
     const minute = time.getMinutes().toString().padStart(2, "0");
     const second = time.getSeconds().toString().padStart(2, "0");
+
+    // ✅ Helper to convert YouTube URL to Embed URL
+    const getYoutubeEmbedUrl = (url: string) => {
+        let videoId = "";
+
+        // Match standard watch URLs, short URLs, embeds, shorts, and live streams
+        const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+        const match = url.match(regex);
+
+        if (match && match[1]) {
+            videoId = match[1];
+        }
+
+        if (!videoId) return "";
+
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+    };
 
     // ✅ Tentukan apakah bisa scroll (hanya mobile)
     const canScroll = deviceType === 'mobile';
@@ -253,7 +288,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                     INSPEKTORAT JENDERAL
                                 </h1>
                                 <p className="text-blue-200 text-xs md:text-sm font-medium">
-                                    Kementerian Dalam Negeri RI 
+                                    Kementerian Dalam Negeri RI
                                 </p>
                             </div>
                         </div>
@@ -302,7 +337,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
 
                             {/* Video Player - DENGAN BORDER BIRU TAPI VIDEO FULL */}
                             <div className="bg-gradient-to-br from-[#c4cfe2] to-[#4d8be9] rounded-2xl shadow-xl p-1 overflow-hidden h-[180px] md:flex-1">
-                               {/*  <div className="w-full h-full bg-black rounded-lg overflow-hidden">
+                                {/*  <div className="w-full h-full bg-black rounded-lg overflow-hidden">
                                     {video && video.url ? (
                                         <video
                                             src={video.url}
@@ -328,23 +363,23 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                 </div>*/}
 
                                 {/* Tabel */}
-                            <div className={`rounded-xl bg-blue shadow-inner ${canScroll ? 'overflow-visible' : 'flex-1 overflow-hidden min-h-0'}`}>
-                                <div className={`${canScroll ? 'overflow-visible' : 'h-full overflow-hidden'}`}>
-                                    <JadwalRapatTable
-                                        jadwal={jadwalData.filter(item => 
-                                            item.kasubak === 'approve' &&
-                                            item.ula === 'approve'
+                                <div className={`rounded-xl bg-blue shadow-inner ${canScroll ? 'overflow-visible' : 'flex-1 overflow-hidden min-h-0'}`}>
+                                    <div className={`${canScroll ? 'overflow-visible' : 'h-full overflow-hidden'}`}>
+                                        <JadwalRapatTable
+                                            jadwal={jadwalData.filter(item =>
+                                                item.kasubak === 'approve' &&
+                                                item.ula === 'approve'
 
-                                        )}
-                                        onPageChange={handlePageChange}
-                                        deviceType={deviceType}
-                                    />
+                                            )}
+                                            onPageChange={handlePageChange}
+                                            deviceType={deviceType}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            
+
                             </div>
                         </div>
-                        
+
 
                         {/* Kolom Kanan: Tabel Jadwal - Background BIRU MUDA */}
                         <div
@@ -353,14 +388,41 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                             <div className="bg-gradient-to-br from-[#072355] to-[#072355] rounded-2xl shadow-xl p-1 overflow-hidden h-[180px] md:flex-1">
                                 <div className="w-full h-full bg-black rounded-lg overflow-hidden">
                                     {video && video.url ? (
-                                        <video
-                                            src={video.url}
-                                            autoPlay
-                                            muted
-                                            loop
-                                            playsInline
-                                            className="w-full h-full object-cover"
-                                        />
+                                        video.source_type === 'youtube' ? (
+                                            getYoutubeEmbedUrl(video.url) ? (
+                                                <div className="w-full h-full relative group">
+                                                    <iframe
+                                                        src={getYoutubeEmbedUrl(video.url)}
+                                                        className="w-full h-full border-0"
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                        allowFullScreen
+                                                    />
+                                                    <a
+                                                        href={video.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        Tonton di YouTube
+                                                    </a>
+                                                </div>
+                                            ) : (
+                                                <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 rounded-lg p-4 text-center">
+                                                    <p className="text-red-400 font-bold mb-2">Link YouTube Tidak Valid</p>
+                                                    <p className="text-white text-xs mb-4">{video.url}</p>
+                                                    <a href="/manajemen-video" className="text-blue-400 underline text-sm">Perbaiki di Manajemen Video</a>
+                                                </div>
+                                            )
+                                        ) : (
+                                            <video
+                                                src={video.url}
+                                                autoPlay
+                                                muted
+                                                loop
+                                                playsInline
+                                                className="w-full h-full object-cover"
+                                            />
+                                        )
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-gray-900 rounded-lg">
                                             <div className="text-center">
@@ -400,7 +462,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                             </div>
                             */}
 
-                            
+
 
                             {/* ✅ Pagination dots - hanya tampil untuk desktop & TV 
                             {totalPages > 1 && !canScroll && (

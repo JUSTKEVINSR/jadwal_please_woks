@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { router } from "@inertiajs/react";
 import { usePage } from "@inertiajs/react";
@@ -15,19 +15,59 @@ interface Video {
     file?: File | null;
     path?: string | null;
     token?: string;
+    source_type: 'local' | 'youtube';
     signed_url?: string; // ✅ Signed URL dari backend
 }
 
 export default function Index() {
-    const { videos } = usePage().props as unknown as { videos: Video[] };
+    const { videos, auth } = usePage().props as any;
+
+    useEffect(() => {
+        if (auth.user.role !== 'admin') {
+            router.visit('/dashboard');
+        }
+    }, [auth.user.role]);
+
+    // Real-time updates for videos
+    useEffect(() => {
+        if (window.Echo) {
+            const channel = window.Echo.channel('public-videos');
+
+            channel.listen('.video.created', (data: any) => {
+                console.log('VideoManager: New video created:', data);
+                toast.success('Video baru telah ditambahkan (Realtime)');
+                router.reload({ only: ['videos'] });
+            });
+
+            channel.listen('.video.updated', (data: any) => {
+                console.log('VideoManager: Video updated:', data);
+                toast.info('Video telah diperbarui (Realtime)');
+                router.reload({ only: ['videos'] });
+            });
+
+            channel.listen('.video.deleted', (data: any) => {
+                console.log('VideoManager: Video deleted:', data);
+                toast.info('Video telah dihapus (Realtime)');
+                router.reload({ only: ['videos'] });
+            });
+
+            return () => {
+                channel.stopListening('.video.created');
+                channel.stopListening('.video.updated');
+                channel.stopListening('.video.deleted');
+            };
+        }
+    }, []);
 
     const [showModal, setShowModal] = useState(false);
-    const [form, setForm] = useState<Video>({
+    const [form, setForm] = useState<Video & { youtube_url?: string }>({
         tanggal: "",
         judul: "",
         durasi: "",
         status: "nonaktif",
+        source_type: 'local',
         file: null,
+        youtube_url: '',
     });
 
     const handleAddVideo = () => {
@@ -36,7 +76,9 @@ export default function Index() {
             judul: "",
             durasi: "",
             status: "nonaktif",
+            source_type: 'local',
             file: null,
+            youtube_url: '',
         });
         setShowModal(true);
     };
@@ -48,7 +90,13 @@ export default function Index() {
         formData.append("judul", form.judul);
         formData.append("durasi", form.durasi);
         formData.append("status", form.status);
-        if (form.file) formData.append("file", form.file);
+        formData.append("source_type", form.source_type);
+
+        if (form.source_type === 'local' && form.file) {
+            formData.append("file", form.file);
+        } else if (form.source_type === 'youtube' && form.youtube_url) {
+            formData.append("youtube_url", form.youtube_url);
+        }
 
         router.post("/manajemen-video", formData, {
             onSuccess: () => {
@@ -110,6 +158,7 @@ export default function Index() {
                             <tr>
                                 <th className="p-2 border">Tanggal</th>
                                 <th className="p-2 border">Judul</th>
+                                <th className="p-2 border">Source</th>
                                 <th className="p-2 border">Durasi</th>
                                 <th className="p-2 border">File</th>
                                 <th className="p-2 border">Status</th>
@@ -130,12 +179,19 @@ export default function Index() {
                                 <tr key={v.id} className="border hover:bg-gray-50">
                                     <td className="p-2 border">{v.tanggal}</td>
                                     <td className="p-2 border">{v.judul}</td>
+                                    <td className="p-2 border text-center">
+                                        {v.source_type === 'youtube' ? (
+                                            <span className="text-red-600 font-bold text-xs border border-red-200 bg-red-50 px-2 py-1 rounded">YouTube</span>
+                                        ) : (
+                                            <span className="text-blue-600 font-bold text-xs border border-blue-200 bg-blue-50 px-2 py-1 rounded">Local</span>
+                                        )}
+                                    </td>
                                     <td className="p-2 border text-center">{v.durasi}</td>
                                     <td className="p-2 border text-center">
                                         {v.path && v.signed_url ? (
-                                            <a 
-                                                href={v.signed_url} 
-                                                target="_blank" 
+                                            <a
+                                                href={v.signed_url}
+                                                target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-blue-600 underline hover:text-blue-800"
                                             >
@@ -150,11 +206,10 @@ export default function Index() {
                                         <button
                                             type="button"
                                             onClick={() => handleToggleStatus(v.id!)}
-                                            className={`px-3 py-1 rounded-full text-white transition-colors ${
-                                                v.status === "aktif"
-                                                    ? "bg-green-600 hover:bg-green-700"
-                                                    : "bg-red-500 hover:bg-red-600"
-                                            }`}
+                                            className={`px-3 py-1 rounded-full text-white transition-colors ${v.status === "aktif"
+                                                ? "bg-green-600 hover:bg-green-700"
+                                                : "bg-red-500 hover:bg-red-600"
+                                                }`}
                                         >
                                             {v.status === "aktif" ? "Aktif" : "Nonaktif"}
                                         </button>
@@ -247,15 +302,54 @@ export default function Index() {
                                     required
                                 />
 
-                                <input
-                                    type="file"
-                                    accept="video/*"
-                                    onChange={(e) =>
-                                        setForm({ ...form, file: e.target.files?.[0] })
-                                    }
-                                    className="w-full border p-2 rounded"
-                                    required
-                                />
+                                {/* Source Type Selection */}
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="source_type"
+                                            value="local"
+                                            checked={form.source_type === 'local'}
+                                            onChange={() => setForm({ ...form, source_type: 'local' })}
+                                        />
+                                        <span>Upload File</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="source_type"
+                                            value="youtube"
+                                            checked={form.source_type === 'youtube'}
+                                            onChange={() => setForm({ ...form, source_type: 'youtube' })}
+                                        />
+                                        <span>YouTube Link</span>
+                                    </label>
+                                </div>
+
+                                {form.source_type === 'local' ? (
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={(e) =>
+                                            setForm({ ...form, file: e.target.files?.[0] })
+                                        }
+                                        className="w-full border p-2 rounded"
+                                        required
+                                    />
+                                ) : (
+                                    <input
+                                        type="url"
+                                        value={form.youtube_url}
+                                        onChange={(e) =>
+                                            setForm({ ...form, youtube_url: e.target.value })
+                                        }
+                                        className="w-full border p-2 rounded"
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                        required
+                                    />
+                                )}
+
+
 
                                 <button
                                     type="submit"

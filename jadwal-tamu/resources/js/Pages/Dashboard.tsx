@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import { PageProps } from '@/types';
 
 interface DashboardProps extends PageProps {
@@ -11,7 +11,7 @@ interface DashboardProps extends PageProps {
 
 export default function Dashboard() {
   const { auth, totalJadwal, rapatSelesai, rapatTertunda } =
-  usePage().props as unknown as DashboardProps;
+    usePage().props as unknown as DashboardProps;
 
   const [stats, setStats] = useState({
     totalJadwal,
@@ -23,33 +23,26 @@ export default function Dashboard() {
   useEffect(() => {
     if (window.Echo) {
       const channel = window.Echo.channel('public-jadwal-rapat');
-      
-      channel.listen('jadwal-rapat.created', (data: any) => {
+
+      channel.listen('.jadwal-rapat.created', (data: any) => {
         console.log('Dashboard: New jadwal created:', data);
-        setStats(prev => ({
-          ...prev,
-          totalJadwal: prev.totalJadwal + 1
-        }));
+        router.reload({ only: ['totalJadwal', 'rapatSelesai', 'rapatTertunda'] });
       });
-      
-      channel.listen('jadwal-rapat.updated', (data: any) => {
+
+      channel.listen('.jadwal-rapat.updated', (data: any) => {
         console.log('Dashboard: Jadwal updated:', data);
-        // Logic to update rapatSelesai/rapatTertunda based on status changes
-        // This would need to be implemented based on your business logic
+        router.reload({ only: ['totalJadwal', 'rapatSelesai', 'rapatTertunda'] });
       });
-      
-      channel.listen('jadwal-rapat.deleted', (data: any) => {
+
+      channel.listen('.jadwal-rapat.deleted', (data: any) => {
         console.log('Dashboard: Jadwal deleted:', data);
-        setStats(prev => ({
-          ...prev,
-          totalJadwal: Math.max(0, prev.totalJadwal - 1)
-        }));
+        router.reload({ only: ['totalJadwal', 'rapatSelesai', 'rapatTertunda'] });
       });
 
       return () => {
-        channel.stopListening('jadwal-rapat.created');
-        channel.stopListening('jadwal-rapat.updated');
-        channel.stopListening('jadwal-rapat.deleted');
+        channel.stopListening('.jadwal-rapat.created');
+        channel.stopListening('.jadwal-rapat.updated');
+        channel.stopListening('.jadwal-rapat.deleted');
       };
     }
   }, []);
@@ -68,7 +61,7 @@ export default function Dashboard() {
                 Selamat Datang, {auth?.user?.name ?? 'User'} 🎉
               </h1>
               <p className="text-gray-600 mb-6">
-                Ini adalah halaman Dashboard kamu. 
+                Ini adalah halaman Dashboard kamu.
                 Gunakan menu di samping untuk mengelola jadwal rapat, daftar tamu, dan manajemen video.
               </p>
 
@@ -76,17 +69,17 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg shadow-sm">
                   <h3 className="font-semibold text-blue-700">Total Jadwal</h3>
-                  <p className="text-3xl font-bold text-blue-900 mt-2">{stats.totalJadwal}</p>
+                  <p className="text-3xl font-bold text-blue-900 mt-2">{totalJadwal}</p>
                 </div>
 
                 <div className="p-4 bg-green-50 border border-green-100 rounded-lg shadow-sm">
                   <h3 className="font-semibold text-green-700">Rapat Selesai</h3>
-                  <p className="text-3xl font-bold text-green-900 mt-2">{stats.rapatSelesai}</p>
+                  <p className="text-3xl font-bold text-green-900 mt-2">{rapatSelesai}</p>
                 </div>
 
                 <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-lg shadow-sm">
                   <h3 className="font-semibold text-yellow-700">Rapat Tertunda</h3>
-                  <p className="text-3xl font-bold text-yellow-900 mt-2">{stats.rapatTertunda}</p>
+                  <p className="text-3xl font-bold text-yellow-900 mt-2">{rapatTertunda}</p>
                 </div>
               </div>
             </div>

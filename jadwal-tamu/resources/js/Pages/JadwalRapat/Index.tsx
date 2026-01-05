@@ -29,9 +29,9 @@ interface JadwalRapat {
     ula: "pending" | "rejected" | "approve";
 }
 
-const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, fetchBookedDates }: { 
-    selectedDate: Date; 
-    onDateChange: (date: Date) => void; 
+const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, fetchBookedDates }: {
+    selectedDate: Date;
+    onDateChange: (date: Date) => void;
     lokasi: number;
     getDateColor: (date: Date) => string;
     fetchBookedDates: (month: string, lokasi: number) => Promise<void>;
@@ -91,14 +91,14 @@ const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, 
             />
             {showDatePicker && (
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[9999]" onClick={() => setShowDatePicker(false)}>
-                        
+
                     <div className="bg-white border rounded-lg shadow-lg p-4 w-80"
-                    style={{
+                        style={{
                             width: 300,
                             textAlign: "center",
                             border: "3px solid #00427c",
                         }}
-                    onClick={(e) => e.stopPropagation()}>
+                        onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-4">
                             <button onClick={prevMonth} className="text-[#0B3D91] font-bold text-lg hover:bg-gray-100 px-2 rounded">‹</button>
                             <span className="font-semibold text-[#0B3D91]">
@@ -120,11 +120,11 @@ const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, 
                         <div className="grid grid-cols-7 gap-1">
                             {calendarDays.map((day, index) => {
                                 const isSelected = day && selectedDate.getDate() === day &&
-                                                 selectedDate.getMonth() === currentDate.getMonth() &&
-                                                 selectedDate.getFullYear() === currentDate.getFullYear();
+                                    selectedDate.getMonth() === currentDate.getMonth() &&
+                                    selectedDate.getFullYear() === currentDate.getFullYear();
                                 const isToday = day && new Date().getDate() === day &&
-                                              new Date().getMonth() === currentDate.getMonth() &&
-                                              new Date().getFullYear() === currentDate.getFullYear();
+                                    new Date().getMonth() === currentDate.getMonth() &&
+                                    new Date().getFullYear() === currentDate.getFullYear();
                                 const dateObj = day ? new Date(currentDate.getFullYear(), currentDate.getMonth(), day) : null;
                                 const dayColor = dateObj ? getDateColor(dateObj) : '#16a34a';
 
@@ -137,8 +137,8 @@ const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, 
                                             w-8 h-8 text-sm rounded-md transition-colors
                                             ${!day ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100'}
                                             ${isSelected ? 'bg-[#0B3D91] text-white font-bold' :
-                                              isToday ? 'bg-blue-100 text-blue-600 font-semibold' :
-                                              day ? 'text-gray-700' : 'text-gray-300'}
+                                                isToday ? 'bg-blue-100 text-blue-600 font-semibold' :
+                                                    day ? 'text-gray-700' : 'text-gray-300'}
                                         `}
                                         style={{
                                             color: isSelected || isToday ? undefined : dayColor,
@@ -161,8 +161,8 @@ const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, 
                         </div>
                     </div>
                 </div>
-          
-         )}
+
+            )}
         </div>
     );
 };
@@ -170,15 +170,14 @@ const CircularDatePicker = ({ selectedDate, onDateChange, lokasi, getDateColor, 
 export default function Index() {
     const { jadwal, statusFilter, rooms, auth } = usePage().props as any;
     const [filter, setFilter] = useState(statusFilter);
-    
+
     // Check if the user has the required role to edit or delete any jadwal rapat
     const canEditAnyJadwal = auth.user && ['admin', 'ula', 'kasubak'].includes(auth.user.role);
-    const canDeleteIndividualJadwal = auth.user && ['user'].includes(auth.user.role);
-    
+
     // Check if the user has the required role to interact with Kasubak dropdown
     const canInteractWithKasubak = auth.user && ['admin', 'kasubak'].includes(auth.user.role);
 
-     // Check if the user has the required role to interact with Ula dropdown
+    // Check if the user has the required role to interact with Ula dropdown
     const canInteractWithUla = auth.user && ['admin', 'ula'].includes(auth.user.role);
 
     // Check if the user has the required role to interact with only Admin
@@ -247,7 +246,7 @@ export default function Index() {
     // Ambil info halaman dari backend
     const page = jadwal.current_page;
     const totalPages = jadwal.last_page;
-    
+
 
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [pickerTarget, setPickerTarget] = useState<
@@ -257,8 +256,9 @@ export default function Index() {
     const [selectedMinute, setSelectedMinute] = useState(0);
     const [ampm, setAmpm] = useState<"AM" | "PM">("AM");
     const [pickerStep, setPickerStep] = useState<"hour" | "minute">("hour");
-    const [bookedTimes, setBookedTimes] = useState<{ start: string; end: string; status: string }[]>([]);
-    const [bookedDates, setBookedDates] = useState<{ date: string; status: string }[]>([]);
+    const [bookedTimes, setBookedTimes] = useState<{ start: string; end: string; status: string; kasubak: string; ula: string }[]>([]);
+    const [bookedDates, setBookedDates] = useState<{ date: string; status: string; kasubak: string; ula: string }[]>([]);
+
 
     // Format tanggal ke Indonesia
     const formatDateIndo = (date: string | Date) => {
@@ -295,8 +295,8 @@ export default function Index() {
         setForm({
             id: item.id,
             tanggal: new Date(item.tanggal),
-            jam_mulai: item.jam_mulai,
-            jam_selesai: item.jam_selesai,
+            jam_mulai: formatTime(item.jam_mulai),
+            jam_selesai: formatTime(item.jam_selesai),
             judul: item.judul,
             keterangan: item.keterangan,
             lokasi: parseInt(item.lokasi),
@@ -311,42 +311,42 @@ export default function Index() {
         setShowModal(true);
     };
 
-const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
 
-    const payload = {
-        tanggal: form.tanggal.toISOString().split("T")[0],
-        jam_mulai: form.jam_mulai,
-        jam_selesai: form.jam_selesai,
-        judul: form.judul,
-        keterangan: form.keterangan,
-        lokasi: form.lokasi,
-        status: form.status || "Belum",
-        gunakan_zoom: form.gunakan_zoom,
-        nama_pic: form.nama_pic,
-        nomor_pic: form.nomor_pic,
-        kasubak: form.kasubak,
-        ula: form.ula,
+        const payload = {
+            tanggal: form.tanggal.toISOString().split("T")[0],
+            jam_mulai: form.jam_mulai,
+            jam_selesai: form.jam_selesai,
+            judul: form.judul,
+            keterangan: form.keterangan,
+            lokasi: form.lokasi,
+            status: form.status || "Belum",
+            gunakan_zoom: form.gunakan_zoom,
+            nama_pic: form.nama_pic,
+            nomor_pic: form.nomor_pic,
+            kasubak: form.kasubak,
+            ula: form.ula,
+        };
+
+        if (modalMode === "add") {
+            router.post("/jadwal-rapat", payload, {
+                onSuccess: () => {
+                    toast.success("✅ Jadwal berhasil ditambahkan!");
+                    setShowModal(false);
+                    router.reload({ only: ["jadwal"] });
+                },
+            });
+        } else {
+            router.put(`/jadwal-rapat/${form.id}`, payload, {
+                onSuccess: () => {
+                    toast.success("✏️ Jadwal berhasil diedit!");
+                    setShowModal(false);
+                    router.reload({ only: ["jadwal"] });
+                },
+            });
+        }
     };
-
-    if (modalMode === "add") {
-        router.post("/jadwal-rapat", payload, {
-            onSuccess: () => {
-                toast.success("✅ Jadwal berhasil ditambahkan!");
-                setShowModal(false);
-                router.reload({ only: ["jadwal"] });
-            },
-        });
-    } else {
-        router.put(`/jadwal-rapat/${form.id}`, payload, {
-            onSuccess: () => {
-                toast.success("✏️ Jadwal berhasil diedit!");
-                setShowModal(false);
-                router.reload({ only: ["jadwal"] });
-            },
-        });
-    }
-};
 
 
     // Handle status change
@@ -366,7 +366,7 @@ const handleSubmit = (e: React.FormEvent) => {
             }
         );
     };
-    
+
 
     const handleSetTimeFromPicker = () => {
         const formatted = `${String(selectedHour).padStart(2, "0")}:${String(
@@ -403,7 +403,7 @@ const handleSubmit = (e: React.FormEvent) => {
     const fetchBookedDates = async (month: string, lokasi: number) => {
         try {
             const url = `/jadwal-rapat/booked-dates?month=${month}&lokasi=${lokasi}`;
-            
+
             console.log('Fetching booked dates:', url);
             const response = await fetch(url);
             const data = await response.json();
@@ -417,9 +417,24 @@ const handleSubmit = (e: React.FormEvent) => {
 
     const isTimeBooked = (hour24: number, minute: number) => {
         const time = `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
-        const booked = bookedTimes.some(({ start, end }) => time >= start && time < end);
-        console.log(`Checking if ${time} is booked:`, booked);
-        return booked;
+        const overlapping = bookedTimes.find(({ start, end }) => time >= start && time < end);
+
+        if (overlapping) {
+            // Rule 1: If ANY is rejected, it's available (pickable)
+            if (overlapping.kasubak === 'rejected' || overlapping.ula === 'rejected') {
+                return false;
+            }
+
+            // Rule 2: Only booked (unpickable) if BOTH are approved
+            if (overlapping.kasubak === 'approve' && overlapping.ula === 'approve') {
+                return true;
+            }
+
+            // Rule 3: Otherwise (pending, or one approved one pending) it's pickable
+            return false;
+        }
+
+        return false;
     };
 
     // Fetch booked data when location changes
@@ -428,7 +443,7 @@ const handleSubmit = (e: React.FormEvent) => {
         if (form.tanggal && form.lokasi) {
             fetchBookedTimes(form.tanggal, form.lokasi, modalMode === "edit" ? form.id : undefined);
         }
-        
+
         // Fetch booked dates for current month and new location
         const currentMonth = `${form.tanggal.getFullYear()}-${String(form.tanggal.getMonth() + 1).padStart(2, '0')}`;
         fetchBookedDates(currentMonth, form.lokasi);
@@ -437,40 +452,40 @@ const handleSubmit = (e: React.FormEvent) => {
     // Real-time updates for jadwal rapat table
     useEffect(() => {
         console.log('🔌 JadwalRapat: Setting up broadcasting listeners...');
-        
+
         if (typeof window !== 'undefined' && window.Echo) {
             console.log('✅ JadwalRapat: Echo is available');
             const channel = window.Echo.channel('public-jadwal-rapat');
             console.log('📡 JadwalRapat: Created channel:', channel);
-            
+
             // Add connection debugging
             channel.on('pusher:subscription_succeeded', (members) => {
                 console.log('🎉 JadwalRapat: Successfully subscribed to channel', members);
             });
-            
+
             channel.on('pusher:subscription_error', (status) => {
                 console.error('❌ JadwalRapat: Subscription error', status);
             });
-            
+
             channel.on('pusher:ping', () => {
                 console.log('🏓 JadwalRapat: Ping received');
             });
-            
-            channel.listen('jadwal-rapat.created', (data: any) => {
+
+            channel.listen('.jadwal-rapat.created', (data: any) => {
                 console.log('🎉 JadwalRapat: New jadwal created:', data);
                 toast.success(data.message || 'Jadwal rapat baru telah ditambahkan');
                 // Reload the jadwal data to show new entry
                 router.reload({ only: ["jadwal"] });
             });
-            
-            channel.listen('jadwal-rapat.updated', (data: any) => {
+
+            channel.listen('.jadwal-rapat.updated', (data: any) => {
                 console.log('🔄 JadwalRapat: Jadwal updated:', data);
                 toast.info(data.message || 'Jadwal rapat telah diperbarui');
                 // Reload the jadwal data to reflect changes
                 router.reload({ only: ["jadwal"] });
             });
-            
-            channel.listen('jadwal-rapat.deleted', (data: any) => {
+
+            channel.listen('.jadwal-rapat.deleted', (data: any) => {
                 console.log('🗑️ JadwalRapat: Jadwal deleted:', data);
                 toast.info(data.message || 'Jadwal rapat telah dihapus');
                 // Reload the jadwal data to remove deleted entry
@@ -481,9 +496,9 @@ const handleSubmit = (e: React.FormEvent) => {
 
             return () => {
                 console.log('🧹 JadwalRapat: Cleaning up broadcasting listeners');
-                channel.stopListening('jadwal-rapat.created');
-                channel.stopListening('jadwal-rapat.updated');
-                channel.stopListening('jadwal-rapat.deleted');
+                channel.stopListening('.jadwal-rapat.created');
+                channel.stopListening('.jadwal-rapat.updated');
+                channel.stopListening('.jadwal-rapat.deleted');
             };
         } else {
             console.error('❌ JadwalRapat: Echo is not available');
@@ -504,39 +519,58 @@ const handleSubmit = (e: React.FormEvent) => {
         console.log(`Checking if minute ${minute} for hour ${selectedHour} (${hour24}) is booked`);
         return isTimeBooked(hour24, minute);
     };
- 
+
     const getTimeColor = (hour24: number, minute: number) => {
         const time = `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
-        const overlapping = bookedTimes.find(({ start, end }) => time >= start && time < end) as { start: string; end: string; status: string } | undefined;
+        const overlapping = bookedTimes.find(({ start, end }) => time >= start && time < end) as { start: string; end: string; status: string; kasubak: string; ula: string } | undefined;
+
         if (overlapping) {
-            if (overlapping.status === 'Belum') return '#dc2626'; // Red for not available
-            if (overlapping.status === 'Proses') return '#eab308'; // Yellow for booked
-            return '#dc2626'; // Default to red
+            // Rule 1: If ANY is rejected, it's available (Green)
+            if (overlapping.kasubak === 'rejected' || overlapping.ula === 'rejected') {
+                return '#16a34a';
+            }
+
+            // Rule 2: Only Red if BOTH are approved
+            if (overlapping.kasubak === 'approve' && overlapping.ula === 'approve') {
+                return '#dc2626';
+            }
+
+            // Rule 3: Otherwise (pending mixed with approved/pending) -> Yellow
+            return '#eab308';
         }
-        
+
         return '#16a34a'; // Green for available
     };
 
     const getDateColor = (date: Date) => {
         const dateStr = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
         const bookingsOnDate = bookedDates.filter(booking => booking.date === dateStr);
-        
+
         if (bookingsOnDate.length === 0) {
             return '#16a34a'; // Green: No bookings
         }
-        
-        // Check for "Belum" status (highest priority)
-        if (bookingsOnDate.some(booking => booking.status === 'Belum')) {
-            return '#eab308'; // Yellow: Has unstarted bookings
+
+        // Filter active bookings (not rejected)
+        // If a booking is rejected by either kasubak or ula, it's considered available/green
+        const activeBookings = bookingsOnDate.filter(booking =>
+            booking.kasubak !== 'rejected' && booking.ula !== 'rejected'
+        );
+
+        if (activeBookings.length === 0) {
+            return '#16a34a'; // Green: All bookings are rejected
         }
-        
-        // Check for "Proses" status
-        if (bookingsOnDate.some(booking => booking.status === 'Proses')) {
-            return '#dc2626'; // Red: Has ongoing bookings
+
+        // Check if any booking is fully approved (Red)
+        const hasFullyApproved = activeBookings.some(booking =>
+            booking.kasubak === 'approve' && booking.ula === 'approve'
+        );
+
+        if (hasFullyApproved) {
+            return '#dc2626'; // Red: Has fully approved booking
         }
-        
-        // Default: All "Selesai" or other statuses
-        return '#16a34a'; // Green: Available or completed
+
+        // Otherwise, it must be pending (Yellow)
+        return '#eab308'; // Yellow: Has pending bookings
     };
 
     const changeStatus = (
@@ -627,11 +661,10 @@ const handleSubmit = (e: React.FormEvent) => {
                                         }
                                     );
                                 }}
-                                className={`px-4 md:px-6 py-2 rounded-lg text-sm md:text-base font-semibold transition-all ${
-                                    filter === status
-                                        ? "bg-[#0B3D91] text-white shadow-md"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                }`}
+                                className={`px-4 md:px-6 py-2 rounded-lg text-sm md:text-base font-semibold transition-all ${filter === status
+                                    ? "bg-[#0B3D91] text-white shadow-md"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    }`}
                             >
                                 {status}
                             </button>
@@ -667,10 +700,10 @@ const handleSubmit = (e: React.FormEvent) => {
                                     Lokasi
                                 </th>
 
-                                 <th className="w-24 px-1 md:px-2 py-2 border">
+                                <th className="w-24 px-1 md:px-2 py-2 border">
                                     Gunakan Zoom
                                 </th>
-                                 <th className="px-1 md:px-2 py-2 border">
+                                <th className="px-1 md:px-2 py-2 border">
                                     Nama PIC
                                 </th>
                                 <th className="px-1 md:px-2 py-2 border">
@@ -678,16 +711,16 @@ const handleSubmit = (e: React.FormEvent) => {
                                 </th>
 
                                 <th className="px-1 md:px-2 py-2 border">
-                                   Kasubak
-                               </th>
+                                    Kasubag
+                                </th>
 
-                               <th className="px-1 md:px-2 py-2 border">
-                                   ULA
-                               </th>
+                                <th className="px-1 md:px-2 py-2 border">
+                                    ULA
+                                </th>
 
-                               <th className="px-1 md:px-2 py-2 text-center border">
-                                   Status
-                               </th>
+                                <th className="px-1 md:px-2 py-2 text-center border">
+                                    Status
+                                </th>
                                 <th className="px-1 md:px-2 py-2 text-center border">
                                     Aksi
                                 </th>
@@ -762,13 +795,12 @@ const handleSubmit = (e: React.FormEvent) => {
                                                 }
                                             }}
                                             className={`px-3 py-1 rounded-md text-xs font-semibold block mx-auto
-                                            ${
-                                                row.data.kasubak === "approve"
+                                            ${row.data.kasubak === "approve"
                                                     ? "bg-green-600 text-white"
                                                     : row.data.kasubak === "pending"
-                                                    ? "bg-yellow-400 text-gray-800"
-                                                    : "bg-red-500 text-white"
-                                            }
+                                                        ? "bg-yellow-400 text-gray-800"
+                                                        : "bg-red-500 text-white"
+                                                }
                                             ${!canInteractWithKasubak ? "cursor-not-allowed opacity-100" : ""}
                                             `}
                                             disabled={!canInteractWithKasubak}
@@ -825,23 +857,22 @@ const handleSubmit = (e: React.FormEvent) => {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation(); // ✅ penting!
-                                                if (canInteractWithUla){
+                                                if (canInteractWithUla) {
                                                     setUlaDropdown((prev) =>
                                                         prev === row.data.id
                                                             ? null
                                                             : row.data.id
                                                     );
                                                 }
-                                                
+
                                             }}
                                             className={`px-3 py-1 rounded-md text-xs font-semibold block mx-auto
-                                            ${
-                                                row.data.ula === "approve"
+                                            ${row.data.ula === "approve"
                                                     ? "bg-green-600 text-white"
                                                     : row.data.ula === "pending"
-                                                    ? "bg-yellow-400 text-gray-800"
-                                                    : "bg-red-500 text-white"
-                                            }
+                                                        ? "bg-yellow-400 text-gray-800"
+                                                        : "bg-red-500 text-white"
+                                                }
                                             ${!canInteractWithUla ? "cursor-not-allowed opacity-100" : ""}
                                             `}
                                             disabled={!canInteractWithUla}
@@ -850,7 +881,7 @@ const handleSubmit = (e: React.FormEvent) => {
                                         </button>
 
                                         {/* ✅ ULA Dropdown custom */}
-                                        {ulaDropdown === row.data.id && canInteractWithUla &&(
+                                        {ulaDropdown === row.data.id && canInteractWithUla && (
                                             <div
                                                 className="absolute z-50 bg-white border rounded-lg shadow-md w-28 text-xs text-gray-700 left-1/2 -translate-x-1/2 mt-1 overflow-hidden"
                                                 onClick={(e) =>
@@ -898,32 +929,31 @@ const handleSubmit = (e: React.FormEvent) => {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation(); // ✅ penting!
-                                                if (canInteractWithOnlyAdmin){
+                                                if (canInteractWithOnlyAdmin || row.data.user_id === auth.user.id) {
                                                     setStatusDropdown((prev) =>
-                                                    prev === row.data.id
-                                                        ? null
-                                                        : row.data.id
-                                                );
+                                                        prev === row.data.id
+                                                            ? null
+                                                            : row.data.id
+                                                    );
                                                 }
-                                                
+
                                             }}
                                             className={`px-3 py-1 rounded-md text-xs font-semibold block mx-auto
-                                            ${
-                                                row.data.status === "Selesai"
+                                            ${row.data.status === "Selesai"
                                                     ? "bg-green-600 text-white"
                                                     : row.data.status === "Proses"
-                                                    ? "bg-yellow-400 text-gray-800"
-                                                    : "bg-red-500 text-white"
-                                            }
-                                            ${!canInteractWithOnlyAdmin ? "cursor-not-allowed opacity-100" : ""}
+                                                        ? "bg-yellow-400 text-gray-800"
+                                                        : "bg-red-500 text-white"
+                                                }
+                                            ${!(canInteractWithOnlyAdmin || row.data.user_id === auth.user.id) ? "cursor-not-allowed opacity-100" : ""}
                                             `}
-                                            disabled={!canInteractWithOnlyAdmin}
+                                            disabled={!(canInteractWithOnlyAdmin || row.data.user_id === auth.user.id)}
                                         >
                                             {row.data.status}
                                         </button>
 
                                         {/* ✅ Dropdown custom */}
-                                        {statusDropdown === row.data.id && canInteractWithOnlyAdmin && (
+                                        {statusDropdown === row.data.id && (canInteractWithOnlyAdmin || row.data.user_id === auth.user.id) && (
                                             <div
                                                 className="absolute z-50 bg-white border rounded-lg shadow-md w-28 text-xs text-gray-700 left-1/2 -translate-x-1/2 mt-1 overflow-hidden"
                                                 onClick={(e) =>
@@ -976,10 +1006,10 @@ const handleSubmit = (e: React.FormEvent) => {
                                                 <FaEdit />
                                             </button>
                                         )}
-                                        {(canEditAnyJadwal || canDeleteIndividualJadwal && row.data.user_id === auth.user.id) && (
+                                        {(canEditAnyJadwal || row.data.user_id === auth.user.id) && (
                                             <button
                                                 onClick={() => {
-                                                    if(confirm("Hapus jadwal ini?")) {
+                                                    if (confirm("Hapus jadwal ini?")) {
                                                         router.delete(`/jadwal-rapat/${row.data.id}`, {
                                                             onSuccess: () => {
                                                                 toast.success("🗑️ Jadwal dihapus");
@@ -1008,8 +1038,7 @@ const handleSubmit = (e: React.FormEvent) => {
                             disabled={page === 1}
                             onClick={() =>
                                 router.get(
-                                    `/jadwal-rapat?status=${filter}&page=${
-                                        page - 1
+                                    `/jadwal-rapat?status=${filter}&page=${page - 1
                                     }`,
                                     {},
                                     { preserveScroll: true }
@@ -1017,11 +1046,10 @@ const handleSubmit = (e: React.FormEvent) => {
                             }
                             className={`
         px-4 py-2 rounded-lg border font-semibold transition-all duration-200
-        ${
-            page === 1
-                ? "opacity-40 cursor-not-allowed bg-gray-200 text-gray-500"
-                : "bg-white hover:bg-gray-100 hover:shadow-md text-[#0B3D91] border-[#0B3D91]"
-        }
+        ${page === 1
+                                    ? "opacity-40 cursor-not-allowed bg-gray-200 text-gray-500"
+                                    : "bg-white hover:bg-gray-100 hover:shadow-md text-[#0B3D91] border-[#0B3D91]"
+                                }
       `}
                         >
                             « Sebelumnya
@@ -1035,8 +1063,7 @@ const handleSubmit = (e: React.FormEvent) => {
                             disabled={page === totalPages}
                             onClick={() =>
                                 router.get(
-                                    `/jadwal-rapat?status=${filter}&page=${
-                                        page + 1
+                                    `/jadwal-rapat?status=${filter}&page=${page + 1
                                     }`,
                                     {},
                                     { preserveScroll: true }
@@ -1044,11 +1071,10 @@ const handleSubmit = (e: React.FormEvent) => {
                             }
                             className={`
         px-4 py-2 rounded-lg border font-semibold transition-all duration-200
-        ${
-            page === totalPages
-                ? "opacity-40 cursor-not-allowed bg-gray-200 text-gray-500"
-                : "bg-white hover:bg-gray-100 hover:shadow-md text-[#0B3D91] border-[#0B3D91]"
-        }
+        ${page === totalPages
+                                    ? "opacity-40 cursor-not-allowed bg-gray-200 text-gray-500"
+                                    : "bg-white hover:bg-gray-100 hover:shadow-md text-[#0B3D91] border-[#0B3D91]"
+                                }
       `}
                         >
                             Berikutnya »
@@ -1078,6 +1104,29 @@ const handleSubmit = (e: React.FormEvent) => {
                         {/* Form */}
                         <form onSubmit={handleSubmit}>
                             <div className="grid grid-cols-3 gap-3">
+
+                                {/* Lokasi Select Dropdown */}
+                                <div className="col-span-3">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi</label>
+                                    <select
+                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
+                                        value={form.lokasi}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                lokasi: parseInt(e.target.value),
+                                            })
+                                        }
+                                        required
+                                    >
+                                        {rooms.map((room: any) => (
+                                            <option key={room.room_code} value={room.room_code}>
+                                                {room.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 {/* tanggal */}
                                 <div className="col-span-1">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -1097,7 +1146,7 @@ const handleSubmit = (e: React.FormEvent) => {
                                             dateFormat="yyyy-MM-dd"
                                         />*/}
 
-                                    <CircularDatePicker
+                                        <CircularDatePicker
                                             selectedDate={form.tanggal}
                                             onDateChange={(date: Date) =>
                                                 setForm((prev) => ({
@@ -1108,8 +1157,8 @@ const handleSubmit = (e: React.FormEvent) => {
                                             lokasi={form.lokasi}
                                             getDateColor={getDateColor}
                                             fetchBookedDates={fetchBookedDates}
-                                            />
-                                        
+                                        />
+
 
                                         <FaCalendarAlt className="absolute right-3 top-3 text-[#0B3D91]" />
                                     </div>
@@ -1158,7 +1207,7 @@ const handleSubmit = (e: React.FormEvent) => {
                                     </div>
                                 </div>
 
-                               
+
                                 <div className="col-span-3">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                                         Judul
@@ -1216,7 +1265,7 @@ const handleSubmit = (e: React.FormEvent) => {
                                 </div>
                                 */}
 
-                                {/* Lokasi Select Dropdown */}
+                                {/* Lokasi Select Dropdown 
                                 <div className="col-span-2">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi</label>
                                     <select
@@ -1236,9 +1285,9 @@ const handleSubmit = (e: React.FormEvent) => {
                                             </option>
                                         ))}
                                     </select>
-                                </div>
+                                </div>*/}
 
-                                {/* Zoom Select Dropdown */}
+                                {/* Zoom Select Dropdown 
                                 <div className="col-span-1">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Gunakan Zoom</label>
                                     <select
@@ -1255,7 +1304,7 @@ const handleSubmit = (e: React.FormEvent) => {
                                         <option value="yes">Ya</option>
                                         <option value="no">Tidak</option>
                                     </select>
-                                </div>
+                                </div>*/}
 
                                 {/* Kasubak Select Dropdown 
                                 <div className="col-span-1">
@@ -1278,7 +1327,7 @@ const handleSubmit = (e: React.FormEvent) => {
                                 </div>*/}
 
                                 {/* Nama PIC */}
-                                <div className="col-span-2">
+                                <div className="col-span-3">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                                         Nama PIC
                                     </label>
@@ -1315,20 +1364,43 @@ const handleSubmit = (e: React.FormEvent) => {
                                     />
                                 </div>
 
-                                
+                                {/* Zoom Select Dropdown */}
+                                <div className="col-span-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Gunakan Zoom</label>
+                                    <select
+                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
+                                        value={form.gunakan_zoom}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                gunakan_zoom: e.target.value as "yes" | "no",
+                                            })
+                                        }
+                                        required
+                                    >
+                                        <option value="yes">Ya</option>
+                                        <option value="no">Tidak</option>
+                                    </select>
+                                </div>
 
-                                
+                                {/* tombol */}
+                                <div className="col-span-1">
+                                    <label className="block text-sm font-semibold text-[#ffffff] mb-1">
+                                        TOMBOL HERE
+                                    </label>
+                                    <button
+                                        type="submit"
+                                        className="bg-[#0B3D91] hover:bg-[#001f45] text-white font-semibold px-6 py-2.5 rounded-md text-sm shadow-md transition-transform active:scale-[0.97]"
+                                    >
+                                        {modalMode === "add"
+                                            ? "Tambah Jadwal"
+                                            : "Simpan Perubahan"}
+                                    </button>
+                                </div>
 
-                                
-
-                                
-
-                            
-
-                                    
                             </div>
 
-                            {/* tombol */}
+                            {/* tombol 
                             <div className="flex justify-end mt-6">
                                 <button
                                     type="submit"
@@ -1338,7 +1410,7 @@ const handleSubmit = (e: React.FormEvent) => {
                                         ? "Tambah Jadwal"
                                         : "Simpan Perubahan"}
                                 </button>
-                            </div>
+                            </div>*/}
                         </form>
                     </div>
                 </div>
@@ -1436,11 +1508,10 @@ const handleSubmit = (e: React.FormEvent) => {
                                     position: "absolute",
                                     top: "50%",
                                     left: "50%",
-                                    transform: `rotate(${
-                                        pickerStep === "hour"
-                                            ? (selectedHour % 12) * 30
-                                            : selectedMinute * 6
-                                    }deg)`,
+                                    transform: `rotate(${pickerStep === "hour"
+                                        ? (selectedHour % 12) * 30
+                                        : selectedMinute * 6
+                                        }deg)`,
                                     transformOrigin: "center center",
                                     transition: "transform 0.35s ease-in-out",
                                 }}
@@ -1477,21 +1548,19 @@ const handleSubmit = (e: React.FormEvent) => {
                         {/* AM / PM */}
                         <div className="mt-3">
                             <button
-                                className={`px-3 py-1 rounded mr-2 ${
-                                    ampm === "AM"
-                                        ? "bg-[#00427c] text-white"
-                                        : "border border-[#00427c] text-[#00427c]"
-                                }`}
+                                className={`px-3 py-1 rounded mr-2 ${ampm === "AM"
+                                    ? "bg-[#00427c] text-white"
+                                    : "border border-[#00427c] text-[#00427c]"
+                                    }`}
                                 onClick={() => setAmpm("AM")}
                             >
                                 AM
                             </button>
                             <button
-                                className={`px-3 py-1 rounded ${
-                                    ampm === "PM"
-                                        ? "bg-[#00427c] text-white"
-                                        : "border border-[#00427c] text-[#00427c]"
-                                }`}
+                                className={`px-3 py-1 rounded ${ampm === "PM"
+                                    ? "bg-[#00427c] text-white"
+                                    : "border border-[#00427c] text-[#00427c]"
+                                    }`}
                                 onClick={() => setAmpm("PM")}
                             >
                                 PM

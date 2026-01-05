@@ -19,12 +19,16 @@ class VideoApiController extends Controller
             ->orderBy('tanggal', 'desc')
             ->get()
             ->map(function ($v) {
-                // Generate signed URL valid 6 jam
-                $v->signed_url = URL::temporarySignedRoute(
-                    'video.stream',
-                    now()->addHours(6),
-                    ['video' => $v->id]
-                );
+                if ($v->source_type === 'youtube') {
+                    $v->signed_url = $v->path;
+                } else {
+                    // Generate signed URL valid 6 jam
+                    $v->signed_url = URL::temporarySignedRoute(
+                        'video.stream',
+                        now()->addHours(6),
+                        ['video' => $v->id]
+                    );
+                }
                 return $v;
             });
 
@@ -44,12 +48,23 @@ class VideoApiController extends Controller
             'tanggal' => 'required|date',
             'durasi' => 'required|string|max:10',
             'status' => 'required|in:aktif,nonaktif',
-            'file' => 'required|file|mimes:mp4,mov,avi|max:204800'
+            'source_type' => 'required|in:local,youtube',
+            'file' => 'nullable|file|mimes:mp4,mov,avi|max:204800',
+            'youtube_url' => 'nullable|url',
         ]);
 
-        // Simpan file
-        $path = $request->file('file')->store('videos', 'public');
-        $data['path'] = $path;
+        if ($request->source_type === 'local') {
+            if (!$request->hasFile('file')) {
+                return response()->json(['success' => false, 'message' => 'File video wajib diupload'], 422);
+            }
+            $path = $request->file('file')->store('videos', 'public');
+            $data['path'] = $path;
+        } else {
+            if (!$request->youtube_url) {
+                return response()->json(['success' => false, 'message' => 'Link YouTube wajib diisi'], 422);
+            }
+            $data['path'] = $request->youtube_url;
+        }
 
         // Set owner
         $data['user_id'] = $request->user()->id;
@@ -96,7 +111,7 @@ class VideoApiController extends Controller
         }
 
         // Hapus file
-        if ($video->path && Storage::exists("public/" . $video->path)) {
+        if ($video->source_type === 'local' && $video->path && Storage::exists("public/" . $video->path)) {
             Storage::delete("public/" . $video->path);
         }
 

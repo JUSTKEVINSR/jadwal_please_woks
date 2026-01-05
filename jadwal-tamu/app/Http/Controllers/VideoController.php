@@ -10,15 +10,20 @@ use Illuminate\Support\Facades\URL;
 
 class VideoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $videos = Video::select('id','tanggal','judul','durasi','status','path','token')
-            ->where('user_id', auth()->id())
+        if (!$request->user()->isAdmin()) {
+            abort(403);
+        }
+        $videos = Video::select('id', 'tanggal', 'judul', 'durasi', 'status', 'path', 'token', 'source_type')
+            // ->where('user_id', auth()->id()) // ❌ Hapus filter user agar semua video tampil
             ->orderBy('tanggal', 'desc')
             ->get()
             ->map(function ($video) {
                 // ✅ Generate signed URL untuk setiap video (valid 6 jam)
-                if ($video->path) {
+                if ($video->source_type === 'youtube') {
+                    $video->signed_url = $video->path; // Direct link for YouTube
+                } elseif ($video->path) {
                     $video->signed_url = URL::temporarySignedRoute(
                         'video.stream',
                         now()->addHours(6),
@@ -35,35 +40,53 @@ class VideoController extends Controller
 
     public function store(Request $request)
     {
+        if (!$request->user()->isAdmin()) {
+            abort(403);
+        }
         $validated = $request->validate([
             'tanggal' => 'required|date',
             'judul' => 'required|string|max:255',
             'durasi' => 'required|string|max:10',
             'status' => 'required|in:aktif,nonaktif',
+            'source_type' => 'required|in:local,youtube',
             'file' => 'nullable|file|mimes:mp4,avi,mov|max:204800',
+            'youtube_url' => 'nullable|url',
         ]);
 
-        if ($request->hasFile('file')) {
+        if ($request->source_type === 'local') {
+            if (!$request->hasFile('file')) {
+                return back()->withErrors(['file' => 'File video wajib diupload untuk tipe lokal.']);
+            }
             $path = $request->file('file')->store('videos', 'public');
             $validated['path'] = $path;
+        } elseif ($request->source_type === 'youtube') {
+            if (!$request->youtube_url) {
+                return back()->withErrors(['youtube_url' => 'Link YouTube wajib diisi.']);
+            }
+            $validated['path'] = $request->youtube_url;
+            $validated['file'] = null; // Ensure no file is processed
         }
 
         $validated['user_id'] = auth()->id();
-        $validated['token'] = bin2hex(random_bytes(20)); // Keep for backward compatibility
+        $validated['token'] = bin2hex(random_bytes(20));
 
         Video::create($validated);
 
         return back()->with('message', '✅ Video berhasil ditambahkan.');
     }
 
-    public function destroy(Video $video)
+    public function destroy(Request $request, Video $video)
     {
-        // ✅ Authorization check
-        if ($video->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized');
+        if (!$request->user()->isAdmin()) {
+            abort(403);
         }
+        // ✅ Authorization check
+        // ✅ Authorization check (DIPERBOLEHKAN UNTUK SEMUA ADMIN)
+        // if ($video->user_id !== auth()->id()) {
+        //     abort(403, 'Unauthorized');
+        // }
 
-        if ($video->path && Storage::exists("public/" . $video->path)) {
+        if ($video->source_type === 'local' && $video->path && Storage::exists("public/" . $video->path)) {
             Storage::delete("public/" . $video->path);
         }
 
@@ -72,12 +95,16 @@ class VideoController extends Controller
         return back()->with('success', 'Video berhasil dihapus.');
     }
 
-    public function toggleStatus(Video $video)
+    public function toggleStatus(Request $request, Video $video)
     {
-        // ✅ Authorization check
-        if ($video->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized');
+        if (!$request->user()->isAdmin()) {
+            abort(403);
         }
+        // ✅ Authorization check
+        // ✅ Authorization check (DIPERBOLEHKAN UNTUK SEMUA ADMIN)
+        // if ($video->user_id !== auth()->id()) {
+        //     abort(403, 'Unauthorized');
+        // }
 
         $video->update([
             'status' => $video->status === 'aktif' ? 'nonaktif' : 'aktif',
@@ -115,7 +142,7 @@ class VideoController extends Controller
     {
         $fileSize = filesize($filePath);
         $mimeType = 'video/mp4';
-        
+
         $start = 0;
         $end = $fileSize - 1;
         $length = $fileSize;
@@ -123,7 +150,7 @@ class VideoController extends Controller
         // ✅ Handle Range request (untuk video seeking)
         if ($request->header('Range')) {
             $range = $request->header('Range');
-            
+
             if (preg_match('/bytes=(\d+)-(\d*)/', $range, $matches)) {
                 $start = intval($matches[1]);
                 $end = $matches[2] ? intval($matches[2]) : $end;
@@ -139,14 +166,14 @@ class VideoController extends Controller
         return response()->stream(function () use ($fp, $length) {
             $chunkSize = 1024 * 8; // 8KB chunks
             $read = 0;
-            
+
             while (!feof($fp) && $read < $length) {
                 $toRead = min($chunkSize, $length - $read);
                 echo fread($fp, $toRead);
                 $read += $toRead;
                 flush();
             }
-            
+
             fclose($fp);
         }, $statusCode, [
             'Content-Type' => $mimeType,

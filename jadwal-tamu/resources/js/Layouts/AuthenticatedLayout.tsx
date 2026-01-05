@@ -10,6 +10,8 @@ import {
   FaVideo,
   FaHome,
   FaUserCircle,
+  FaTv,
+  FaUserPlus,
 } from "react-icons/fa";
 
 // Define the interface for the props expected by the Layout
@@ -20,7 +22,7 @@ interface Props {
 // Define the shape of the Inertia page props for type safety
 //   interface PageProps {
 //      auth: { user: User & { role: string } | null };
-        // Add other common props here if needed
+// Add other common props here if needed
 //    }
 
 
@@ -30,7 +32,7 @@ export default function AuthenticatedLayout({
   children,
 }: PropsWithChildren<Props>) {
   const { auth } = usePage<PageProps>().props;
-  const url = usePage().url;
+  const url = usePage().url;
 
   // Now 'user' is correctly typed with the 'role' property
   const user = auth?.user;
@@ -39,10 +41,13 @@ export default function AuthenticatedLayout({
   const menu = [
     { name: "Dashboard", href: "/dashboard", icon: <FaHome /> },
     { name: "Jadwal Rapat", href: "/jadwal-rapat", icon: <FaCalendarAlt /> },
+    { name: "Daftar Tamu", href: "/daftar-tamu", icon: <FaUsers /> },
 
     ...(isAdmin ? [
-    { name: "Daftar Tamu", href: "/daftar-tamu", icon: <FaUsers /> },
-    { name: "Manajemen Video", href: "/manajemen-video", icon: <FaVideo /> },
+      { name: "User Management", href: "/users_plus", icon: <FaUserPlus /> },
+
+      { name: "TV Mode", href: "/", icon: <FaTv /> },
+      { name: "Manajemen Video", href: "/manajemen-video", icon: <FaVideo /> },
     ] : []),
 
   ];
@@ -51,40 +56,42 @@ export default function AuthenticatedLayout({
     <div className="flex min-h-screen bg-[#E9F3FF] text-gray-800">
       {/* ✅ SIDEBAR DESKTOP INI BG SIDE BAR*/}
       <aside className="hidden md:flex fixed inset-y-0 left-0 w-[84px] bg-[#263b5f] flex-col items-center py-6 space-y-6 shadow-xl rounded-r-3xl z-30 overflow-visible">
-        {/* Tombol home view */}
+        {/* Tombol home view 
         {isAdmin && (
-        <Link
-          href="/"
-          className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
-          title="Home"
-        >
-          TV
-        </Link>
-         )}
+          <Link
+            href="/"
+            className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
+            title="Home"
+          >
 
-        {/* Tombol user baru - ONLY VISIBLE TO ADMINS */}
+            TV
+          </Link>
+        )}*/}
+
+        {/* Tombol user baru - ONLY VISIBLE TO ADMINS 
         {isAdmin && (
-            <Link
-                href={route('users.create')}
-                className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
-                title="Create New User"
-            >
-                AC
-            </Link>
-        )}
+          <Link
+            href={route('users.create')}
+            className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
+            title="Create New User"
+          >
+            AC
+          </Link>
+        )}*/}
+
+
         {/* ✅ MENU WITH TOOLTIP DISCORD STYLE */}
         <div className="flex flex-col gap-6 text-white mt-6">
           {menu.map((item) => {
-            const isActive = url.startsWith(item.href);
+            const isActive = item.href === '/' ? url === '/' : url.startsWith(item.href);
             return (
               <div key={item.name} className="relative group">
                 <Link
                   href={item.href}
                   className={`w-12 h-12 flex items-center justify-center rounded-xl transition
-                    ${
-                      isActive
-                        ? "bg-white text-[#0B3D91]"
-                        : "hover:bg-[#B0DAFF] hover:text-[#0B3D91]"
+                    ${isActive
+                      ? "bg-white text-[#0B3D91]"
+                      : "hover:bg-[#B0DAFF] hover:text-[#0B3D91]"
                     }
                   `}
                 >
@@ -164,9 +171,8 @@ export default function AuthenticatedLayout({
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center text-[10px] ${
-                isActive ? "text-[#B0DAFF]" : "opacity-70"
-              }`}
+              className={`flex flex-col items-center text-[10px] ${isActive ? "text-[#B0DAFF]" : "opacity-70"
+                }`}
             >
               <span className="text-lg">{item.icon}</span>
               {item.name}

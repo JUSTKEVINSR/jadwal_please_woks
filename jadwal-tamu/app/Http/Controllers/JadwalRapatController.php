@@ -6,7 +6,10 @@ use App\Models\JadwalRapat;
 use App\Models\RoomMaster;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon; // 👈 1. ADD THIS IMPORT
+use Carbon\Carbon;
+use App\Events\JadwalRapatCreated;
+use App\Events\JadwalRapatUpdated;
+use App\Events\JadwalRapatDeleted;
 
 class JadwalRapatController extends Controller
 {
@@ -15,8 +18,8 @@ class JadwalRapatController extends Controller
         $status = $request->get('status', 'Belum');
 
         $jadwalRapat = JadwalRapat::with('room')->when($status, function ($q) use ($status) {
-                $q->where('status', $status);
-            })
+            $q->where('status', $status);
+        })
             ->orderBy('tanggal', 'desc')
             ->orderBy('jam_mulai', 'asc')
             ->paginate(10)
@@ -70,6 +73,8 @@ class JadwalRapatController extends Controller
         $jadwalRapat->user_id = auth()->id();
         $jadwalRapat->save();
 
+
+
         return redirect()->route('jadwal-rapat.index')
             ->with('message', 'Jadwal rapat berhasil dibuat');
     }
@@ -77,7 +82,7 @@ class JadwalRapatController extends Controller
     public function update(Request $request, JadwalRapat $jadwalRapat)
     {
         $user = auth()->user();
-        
+
         // Log the user's role and the result of the role check
         \Log::info('JadwalRapatController@update: User role check', [
             'user_id' => $user->id,
@@ -86,7 +91,7 @@ class JadwalRapatController extends Controller
             'is_owner' => $jadwalRapat->user_id === $user->id,
             'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak']),
         ]);
-        
+
         // Check if the user is the owner or has the required role
         if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak'])) {
             abort(403);
@@ -99,6 +104,7 @@ class JadwalRapatController extends Controller
 
             $jadwalRapat->update(['status' => $request->status]);
 
+
             return back()->with('message', 'Status jadwal rapat berhasil diperbarui');
         }
 
@@ -109,6 +115,7 @@ class JadwalRapatController extends Controller
 
             $jadwalRapat->update(['kasubak' => $request->kasubak]);
 
+
             return back()->with('message', 'Kasubak jadwal rapat berhasil diperbarui');
         }
 
@@ -118,6 +125,7 @@ class JadwalRapatController extends Controller
             ]);
 
             $jadwalRapat->update(['ula' => $request->ula]);
+
 
             return back()->with('message', 'ULA jadwal rapat berhasil diperbarui');
         }
@@ -157,14 +165,14 @@ class JadwalRapatController extends Controller
 
         $jadwalRapat->update($validated);
 
-        return redirect()->route('jadwal-rapat.index')
-            ->with('message', 'Jadwal rapat berhasil diperbarui');
+
+        return back()->with('message', 'Jadwal rapat berhasil diperbarui');
     }
 
     public function destroy(JadwalRapat $jadwalRapat)
     {
         $user = auth()->user();
-        
+
         // Log the user's role and the result of the role check
         \Log::info('JadwalRapatController@destroy: User role check', [
             'user_id' => $user->id,
@@ -173,7 +181,7 @@ class JadwalRapatController extends Controller
             'is_owner' => $jadwalRapat->user_id === $user->id,
             'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak']),
         ]);
-        
+
         // Check if the user is the owner or has the required role
         if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak'])) {
             abort(403);
@@ -204,7 +212,7 @@ class JadwalRapatController extends Controller
                 $query->where('id', '!=', $validated['exclude_id']);
             }
 
-            $booked = $query->get(['jam_mulai', 'jam_selesai']);
+            $booked = $query->get(['jam_mulai', 'jam_selesai', 'status', 'kasubak', 'ula']);
 
             \Log::info('Booked times found', ['count' => $booked->count()]);
 
@@ -214,6 +222,8 @@ class JadwalRapatController extends Controller
                         'start' => $item->jam_mulai,
                         'end' => $item->jam_selesai,
                         'status' => $item->status,
+                        'kasubak' => $item->kasubak,
+                        'ula' => $item->ula,
                     ];
                 }),
             ]);
@@ -238,7 +248,7 @@ class JadwalRapatController extends Controller
                 ->where('status', '!=', 'Selesai')
                 ->where('user_id', auth()->id());
 
-            $booked = $query->get(['tanggal', 'status']);
+            $booked = $query->get(['tanggal', 'status', 'kasubak', 'ula']);
 
             \Log::info('Booked dates found', ['count' => $booked->count()]);
 
@@ -247,6 +257,8 @@ class JadwalRapatController extends Controller
                     return [
                         'date' => $item->tanggal->toDateString(),
                         'status' => $item->status,
+                        'kasubak' => $item->kasubak,
+                        'ula' => $item->ula,
                     ];
                 }),
             ]);
