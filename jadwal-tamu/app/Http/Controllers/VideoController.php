@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Video;
+use App\Models\VideoSetting;
+use App\Events\VideoSettingUpdated;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
@@ -12,7 +14,7 @@ class VideoController extends Controller
 {
     public function index(Request $request)
     {
-        if (!$request->user()->isAdmin()) {
+        if (!($request->user()->isAdmin() || $request->user()->isUla())) {
             abort(403);
         }
         $videos = Video::select('id', 'tanggal', 'judul', 'durasi', 'status', 'path', 'token', 'source_type')
@@ -34,13 +36,14 @@ class VideoController extends Controller
             });
 
         return Inertia::render('ManajemenVideo/Index', [
-            'videos' => $videos
+            'videos' => $videos,
+            'settings' => VideoSetting::getSettings()
         ]);
     }
 
     public function store(Request $request)
     {
-        if (!$request->user()->isAdmin()) {
+        if (!($request->user()->isAdmin() || $request->user()->isUla())) {
             abort(403);
         }
         $validated = $request->validate([
@@ -77,7 +80,7 @@ class VideoController extends Controller
 
     public function destroy(Request $request, Video $video)
     {
-        if (!$request->user()->isAdmin()) {
+        if (!($request->user()->isAdmin() || $request->user()->isUla())) {
             abort(403);
         }
         // ✅ Authorization check
@@ -97,7 +100,7 @@ class VideoController extends Controller
 
     public function toggleStatus(Request $request, Video $video)
     {
-        if (!$request->user()->isAdmin()) {
+        if (!($request->user()->isAdmin() || $request->user()->isUla())) {
             abort(403);
         }
         // ✅ Authorization check
@@ -187,6 +190,27 @@ class VideoController extends Controller
                 'Content-Range' => "bytes $start-$end/$fileSize"
             ] : [])
         ]);
+    }
+
+    public function updateSettings(Request $request)
+    {
+        if (!($request->user()->isAdmin() || $request->user()->isUla())) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'cycle_duration' => 'nullable|integer|min:0',
+            'is_shuffle' => 'nullable|boolean',
+            'is_muted' => 'nullable|boolean',
+            'show_youtube_hud' => 'nullable|boolean',
+        ]);
+
+        $settings = VideoSetting::getSettings();
+        $settings->update($validated);
+
+        broadcast(new VideoSettingUpdated($settings))->toOthers();
+
+        return back()->with('message', '✅ Pengaturan video diperbarui.');
     }
 
     /**

@@ -31,13 +31,13 @@ Route::middleware(['auth'])->group(function () {
 });
 // CRUD Daftar Tamu
 // Route::resource('daftar-tamu', DaftarTamuController::class)->middleware(['auth']);
- // ✅ Daftar Tamu - PERBAIKAN ROUTE
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/daftar-tamu', [DaftarTamuController::class, 'index'])->name('daftar-tamu.index');
-        Route::post('/daftar-tamu', [DaftarTamuController::class, 'store'])->name('daftar-tamu.store');
-        Route::put('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'update'])->name('daftar-tamu.update');
-        Route::delete('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'destroy'])->name('daftar-tamu.destroy');
-    });
+// ✅ Daftar Tamu - PERBAIKAN ROUTE
+Route::middleware(['auth'])->group(function () {
+    Route::get('/daftar-tamu', [DaftarTamuController::class, 'index'])->name('daftar-tamu.index');
+    Route::post('/daftar-tamu', [DaftarTamuController::class, 'store'])->name('daftar-tamu.store');
+    Route::put('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'update'])->name('daftar-tamu.update');
+    Route::delete('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'destroy'])->name('daftar-tamu.destroy');
+});
 // CRUD Manajemen Video
 // ✅ MANUAL DEFINE CRUD VIDEO (mencegah bentrok)
 Route::middleware(['auth'])->group(function () {
@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/manajemen-video', [VideoController::class, 'store'])->name('manajemen-video.store');
     Route::delete('/manajemen-video/{video}', [VideoController::class, 'destroy'])->name('manajemen-video.destroy');
     Route::put('/manajemen-video/{video}/toggle', [VideoController::class, 'toggleStatus'])->name('manajemen-video.toggle');
+    Route::patch('/manajemen-video/settings', [VideoController::class, 'updateSettings'])->name('manajemen-video.update-settings');
 });
 
 // ===========================
@@ -91,6 +92,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // The authentication routes from Breeze
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 

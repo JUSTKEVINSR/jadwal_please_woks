@@ -26,25 +26,75 @@ interface Jadwal {
 interface Video {
     id: number;
     judul: string;
-    url: string; // ✅ URL dari backend (signed atau direct youtube)
+    url: string;
     source_type: 'local' | 'youtube';
+}
+
+interface VideoSetting {
+    cycle_duration: number;
+    is_shuffle: boolean;
+    is_muted: boolean;
+    show_youtube_hud: boolean;
 }
 
 interface Props {
     canLogin: boolean;
     jadwal: Jadwal[];
-    video?: Video | null;
+    videos: Video[];
+    settings: VideoSetting;
 }
 
 type DeviceType = 'mobile' | 'desktop' | 'tv-small' | 'tv-large';
 
-export default function Home({ canLogin, jadwal, video }: Props) {
+export default function Home({ canLogin, jadwal, videos, settings }: Props) {
     const { auth } = usePage().props as any;
     const [time, setTime] = useState(new Date());
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
     const [jadwalData, setJadwalData] = useState<Jadwal[]>(jadwal);
+
+    // ✅ Video Cycling State
+    const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+    const [orderedVideos, setOrderedVideos] = useState<Video[]>([]);
+
+    useEffect(() => {
+        if (!videos || videos.length === 0) {
+            setOrderedVideos([]);
+            return;
+        }
+
+        let processedVideos = [...videos];
+        if (settings.is_shuffle) {
+            // Fisher-Yates shuffle
+            for (let i = processedVideos.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [processedVideos[i], processedVideos[j]] = [processedVideos[j], processedVideos[i]];
+            }
+        }
+        setOrderedVideos(processedVideos);
+        setCurrentVideoIndex(0);
+    }, [videos, settings.is_shuffle]);
+
+    // ✅ Auto Cycle Logic
+    useEffect(() => {
+        if (settings.cycle_duration > 0 && orderedVideos.length > 1) {
+            const timer = setInterval(() => {
+                setCurrentVideoIndex((prev) => (prev + 1) % orderedVideos.length);
+            }, settings.cycle_duration * 60 * 1000);
+
+            return () => clearInterval(timer);
+        }
+    }, [settings.cycle_duration, orderedVideos]);
+
+    const handleVideoEnd = () => {
+        if (orderedVideos.length > 1) {
+            setCurrentVideoIndex((prev) => (prev + 1) % orderedVideos.length);
+        }
+    };
+
+    const currentVideo = orderedVideos[currentVideoIndex];
+    const { video } = usePage().props as any; // Keep this for Echo reload if needed, but we use props
 
     // Real-time updates for jadwal
     useEffect(() => {
@@ -84,12 +134,16 @@ export default function Home({ canLogin, jadwal, video }: Props) {
 
             const handleVideoUpdate = (data: any) => {
                 console.log('Home: Video update detected:', data);
-                router.reload({ only: ['video'] });
+                router.reload({ only: ['videos', 'settings'] });
             };
 
             videoChannel.listen('.video.created', handleVideoUpdate);
             videoChannel.listen('.video.updated', handleVideoUpdate);
             videoChannel.listen('.video.deleted', handleVideoUpdate);
+            videoChannel.listen('.video.settings.updated', (data: any) => {
+                console.log('Home: Video settings updated:', data);
+                router.reload({ only: ['settings'] });
+            });
 
             console.log('Home: Echo listeners set up successfully');
 
@@ -200,7 +254,10 @@ export default function Home({ canLogin, jadwal, video }: Props) {
 
         if (!videoId) return "";
 
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        // Tambahkan rel=0 dan enablejsapi=1 agar bisa handle end event jika memakai API YouTube (tapi di sini simple logic)
+        const muteParam = settings.is_muted ? '1' : '0';
+        const controlsParam = settings.show_youtube_hud ? '1' : '0';
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=${controlsParam}&loop=${settings.cycle_duration > 0 ? '0' : '1'}&playlist=${videoId}`;
     };
 
     // ✅ Tentukan apakah bisa scroll (hanya mobile)
@@ -312,7 +369,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                             <div
                                 className="bg-gradient-to-br from-[#0B3D91] to-[#1E5BB8] rounded-2xl 
                                             text-white flex flex-col items-center justify-center 
-                                            shadow-xl relative overflow-hidden h-[130px] "
+                                            shadow-xl relative overflow-hidden h-[200px] "
                             >
                                 {/* Dekorasi background */}
                                 <div className="absolute inset-0 opacity-10">
@@ -337,31 +394,6 @@ export default function Home({ canLogin, jadwal, video }: Props) {
 
                             {/* Video Player - DENGAN BORDER BIRU TAPI VIDEO FULL */}
                             <div className="bg-gradient-to-br from-[#c4cfe2] to-[#4d8be9] rounded-2xl shadow-xl p-1 overflow-hidden h-[180px] md:flex-1">
-                                {/*  <div className="w-full h-full bg-black rounded-lg overflow-hidden">
-                                    {video && video.url ? (
-                                        <video
-                                            src={video.url}
-                                            autoPlay
-                                            muted
-                                            loop
-                                            playsInline
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gray-900 rounded-lg">
-                                            <div className="text-center">
-                                                <div className="text-3xl md:text-4xl mb-2">
-                                                    📹
-                                                </div>
-                                                <p className="text-white text-base md:text-lg font-semibold">
-                                                    Video Display
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                    )}
-                                </div>*/}
-
                                 {/* Tabel */}
                                 <div className={`rounded-xl bg-blue shadow-inner ${canScroll ? 'overflow-visible' : 'flex-1 overflow-hidden min-h-0'}`}>
                                     <div className={`${canScroll ? 'overflow-visible' : 'h-full overflow-hidden'}`}>
@@ -378,6 +410,7 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                 </div>
 
                             </div>
+
                         </div>
 
 
@@ -387,18 +420,19 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                         >
                             <div className="bg-gradient-to-br from-[#072355] to-[#072355] rounded-2xl shadow-xl p-1 overflow-hidden h-[180px] md:flex-1">
                                 <div className="w-full h-full bg-black rounded-lg overflow-hidden">
-                                    {video && video.url ? (
-                                        video.source_type === 'youtube' ? (
-                                            getYoutubeEmbedUrl(video.url) ? (
+                                    {currentVideo && currentVideo.url ? (
+                                        currentVideo.source_type === 'youtube' ? (
+                                            getYoutubeEmbedUrl(currentVideo.url) ? (
                                                 <div className="w-full h-full relative group">
                                                     <iframe
-                                                        src={getYoutubeEmbedUrl(video.url)}
+                                                        key={`${currentVideo.id}-${settings.is_muted}-${settings.show_youtube_hud}`} // ✅ Force reload on cycle OR settings change
+                                                        src={getYoutubeEmbedUrl(currentVideo.url)}
                                                         className="w-full h-full border-0"
                                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                         allowFullScreen
                                                     />
                                                     <a
-                                                        href={video.url}
+                                                        href={currentVideo.url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
@@ -409,16 +443,17 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                             ) : (
                                                 <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 rounded-lg p-4 text-center">
                                                     <p className="text-red-400 font-bold mb-2">Link YouTube Tidak Valid</p>
-                                                    <p className="text-white text-xs mb-4">{video.url}</p>
-                                                    <a href="/manajemen-video" className="text-blue-400 underline text-sm">Perbaiki di Manajemen Video</a>
+                                                    <p className="text-white text-xs mb-4">{currentVideo.url}</p>
                                                 </div>
                                             )
                                         ) : (
                                             <video
-                                                src={video.url}
+                                                key={`${currentVideo.id}-${settings.is_muted}`} // ✅ Force reload on cycle OR mute change
+                                                src={currentVideo.url}
                                                 autoPlay
-                                                muted
-                                                loop
+                                                muted={settings.is_muted}
+                                                loop={settings.cycle_duration === 0}
+                                                onEnded={handleVideoEnd}
                                                 playsInline
                                                 className="w-full h-full object-cover"
                                             />
@@ -471,17 +506,16 @@ export default function Home({ canLogin, jadwal, video }: Props) {
                                         (_, i) => (
                                             <div
                                                 key={i}
-                                                className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all ${
-                                                    i === currentPage
-                                                        ? "bg-[#0B3D91] scale-125"
-                                                        : "bg-gray-400"
-                                                }`}
+                                                className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all ${i === currentPage
+                                                    ? "bg-[#0B3D91] scale-125"
+                                                    : "bg-gray-400"
+                                                    }`}
                                             />
                                         )
                                     )}
                                 </div>
-                            )}
-                            */}
+                            )}*/}
+
                         </div>
                     </div>{" "}
                     {/* penutup konten utama */}

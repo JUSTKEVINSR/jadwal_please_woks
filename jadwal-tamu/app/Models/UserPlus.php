@@ -58,4 +58,9 @@ class UserPlus extends Authenticatable
         ]);
         return $isAdmin;
     }
+
+    public function isUla(): bool
+    {
+        return $this->role_code === 8008;
+    }
 }

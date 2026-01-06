@@ -37,6 +37,8 @@ export default function AuthenticatedLayout({
   // Now 'user' is correctly typed with the 'role' property
   const user = auth?.user;
   const isAdmin = user?.role === 'admin';
+  const isUla = user?.role === 'ula';
+  const canManageVideos = isAdmin || isUla;
 
   const menu = [
     { name: "Dashboard", href: "/dashboard", icon: <FaHome /> },
@@ -45,10 +47,13 @@ export default function AuthenticatedLayout({
 
     ...(isAdmin ? [
       { name: "User Management", href: "/users_plus", icon: <FaUserPlus /> },
+    ] : []),
 
+    ...(canManageVideos ? [
       { name: "TV Mode", href: "/", icon: <FaTv /> },
       { name: "Manajemen Video", href: "/manajemen-video", icon: <FaVideo /> },
     ] : []),
+
 
   ];
 
