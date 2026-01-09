@@ -27,8 +27,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // ✅ Paksa semua asset, route, js, css menjadi HTTPS
-        if (config('app.env') === 'production') {
+        if (config('app.env') === 'production' || str_contains(request()->getHost(), 'trycloudflare.com')) {
             URL::forceScheme('https');
+
+            // Fix 419 Page Expired: Ensure cookies work on the tunnel domain
+            config(['session.driver' => 'file']); // Ensure driver is file (optional, but safe)
+            config(['session.secure' => true]);
+            config(['session.domain' => request()->getHost()]);
+            config(['sanctum.stateful' => explode(',', request()->getHost())]);
         }
 
         Vite::prefetch(concurrency: 3);

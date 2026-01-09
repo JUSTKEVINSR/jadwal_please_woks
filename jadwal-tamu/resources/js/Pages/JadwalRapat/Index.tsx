@@ -180,7 +180,8 @@ export default function Index() {
         e.preventDefault();
 
         const payload = {
-            tanggal: form.tanggal.toISOString().split("T")[0],
+            // Fix: Use local date string to prevent timezone shifts
+            tanggal: `${form.tanggal.getFullYear()}-${String(form.tanggal.getMonth() + 1).padStart(2, '0')}-${String(form.tanggal.getDate()).padStart(2, '0')}`,
             jam_mulai: form.jam_mulai,
             jam_selesai: form.jam_selesai,
             judul: form.judul,
@@ -253,7 +254,13 @@ export default function Index() {
 
     const fetchBookedTimes = async (tanggal: Date, lokasi: number, excludeId?: number) => {
         try {
-            const url = `/jadwal-rapat/booked-times?tanggal=${tanggal.toISOString().split('T')[0]}&lokasi=${lokasi}&exclude_id=${excludeId || ''}`;
+            // Fix: Use local date instead of UTC (toISOString)
+            const year = tanggal.getFullYear();
+            const month = String(tanggal.getMonth() + 1).padStart(2, '0');
+            const day = String(tanggal.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+
+            const url = `/jadwal-rapat/booked-times?tanggal=${dateStr}&lokasi=${lokasi}&exclude_id=${excludeId || ''}`;
             console.log('Fetching booked times:', url);
             const response = await fetch(url);
             const data = await response.json();
@@ -408,7 +415,11 @@ export default function Index() {
     };
 
     const getDateColor = (date: Date) => {
-        const dateStr = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        // Fix: Use local date instead of UTC (toISOString)
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
         const bookingsOnDate = bookedDates.filter(booking => booking.date === dateStr);
 
         if (bookingsOnDate.length === 0) {

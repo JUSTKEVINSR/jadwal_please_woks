@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage, router } from '@inertiajs/react';
 import { PageProps } from '@/types';
+import JadwalRapatTable from '@/Components/JadwalRapatTable';
 
 interface DashboardProps extends PageProps {
   totalJadwal: number;
   rapatSelesai: number;
   rapatTertunda: number;
+  jadwal: any[];
 }
 
 export default function Dashboard() {
-  const { auth, totalJadwal, rapatSelesai, rapatTertunda } =
+  const { auth, totalJadwal, rapatSelesai, rapatTertunda, jadwal } =
     usePage().props as unknown as DashboardProps;
 
   const [stats, setStats] = useState({
@@ -19,6 +21,45 @@ export default function Dashboard() {
     rapatTertunda
   });
 
+  const [deviceType, setDeviceType] = useState<'mobile' | 'desktop' | 'tv-small' | 'tv-large'>('desktop');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    const detectDevice = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+      if (width < 1024 && isTouchDevice) {
+        setDeviceType('mobile');
+        return;
+      }
+
+      if (!isTouchDevice && height >= 720) {
+        if (width >= 1280 && width <= 1920) {
+          setDeviceType('tv-small');
+          return;
+        }
+        else if (width > 1920) {
+          setDeviceType('tv-large');
+          return;
+        }
+      }
+
+      setDeviceType('desktop');
+    };
+
+    detectDevice();
+    window.addEventListener('resize', detectDevice);
+    return () => window.removeEventListener('resize', detectDevice);
+  }, []);
+
+  const handlePageChange = (current: number, total: number) => {
+    setCurrentPage(current);
+    setTotalPages(total);
+  };
+
   // Real-time updates for dashboard statistics
   useEffect(() => {
     if (window.Echo) {
@@ -26,17 +67,17 @@ export default function Dashboard() {
 
       channel.listen('.jadwal-rapat.created', (data: any) => {
         console.log('Dashboard: New jadwal created:', data);
-        router.reload({ only: ['totalJadwal', 'rapatSelesai', 'rapatTertunda'] });
+        router.reload({ only: ['totalJadwal', 'rapatSelesai', 'rapatTertunda', 'jadwal'] });
       });
 
       channel.listen('.jadwal-rapat.updated', (data: any) => {
         console.log('Dashboard: Jadwal updated:', data);
-        router.reload({ only: ['totalJadwal', 'rapatSelesai', 'rapatTertunda'] });
+        router.reload({ only: ['totalJadwal', 'rapatSelesai', 'rapatTertunda', 'jadwal'] });
       });
 
       channel.listen('.jadwal-rapat.deleted', (data: any) => {
         console.log('Dashboard: Jadwal deleted:', data);
-        router.reload({ only: ['totalJadwal', 'rapatSelesai', 'rapatTertunda'] });
+        router.reload({ only: ['totalJadwal', 'rapatSelesai', 'rapatTertunda', 'jadwal'] });
       });
 
       return () => {
@@ -86,6 +127,29 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div className="bg-[#B0DAFF] p-7 rounded-2xl shadow-md border border-[#7FB8E5]">
+            <div className="p-6 text-blue-900">
+              <h1 className="text-2xl font-bold mb-4">
+                Daftar Jadwal Rapat
+              </h1>
+
+              <div className="rounded-xl bg-white shadow-inner overflow-hidden min-h-[400px]">
+                <JadwalRapatTable
+                  jadwal={jadwal}
+                  onPageChange={handlePageChange}
+                  deviceType={deviceType}
+                  showExtraColumns={true}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </AuthenticatedLayout>
   );
 }

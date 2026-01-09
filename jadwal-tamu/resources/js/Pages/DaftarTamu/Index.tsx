@@ -18,137 +18,137 @@ interface DaftarTamu {
   jam_selesai: string;
 }
 
-const CircularDatePicker = ({ selectedDate, onDateChange}: { 
-    selectedDate: Date; 
-    onDateChange: (date: Date) => void; 
-    
-    
+const CircularDatePicker = ({ selectedDate, onDateChange }: {
+  selectedDate: Date;
+  onDateChange: (date: Date) => void;
+
+
 }) => {
-      const [currentDate, setCurrentDate] = useState(new Date());
-      const [showDatePicker, setShowDatePicker] = useState(false);
-  
-      const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-      const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-        const handleDateClick = (day: number) => {
-        const selected = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-        onDateChange(selected);
-        setShowDatePicker(false);
-    };
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
 
-    const nextMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-    };
+  const handleDateClick = (day: number) => {
+    const selected = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    onDateChange(selected);
+    setShowDatePicker(false);
+  };
 
-    const prevMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-    };
+  const nextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  };
 
-    // Generate calendar grid
-    const generateCalendar = () => {
-        const calendar = [];
-        const totalCells = 42; // 6 weeks * 7 days
-        let dayCounter = 1;
+  const prevMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
 
-        for (let i = 0; i < totalCells; i++) {
-            if (i < firstDayOfMonth || dayCounter > daysInMonth) {
-                calendar.push(null); // Empty cell
-            } else {
-                calendar.push(dayCounter++);
-            }
-        }
-        return calendar;
-    };
+  // Generate calendar grid
+  const generateCalendar = () => {
+    const calendar = [];
+    const totalCells = 42; // 6 weeks * 7 days
+    let dayCounter = 1;
 
-     const calendarDays = generateCalendar();
+    for (let i = 0; i < totalCells; i++) {
+      if (i < firstDayOfMonth || dayCounter > daysInMonth) {
+        calendar.push(null); // Empty cell
+      } else {
+        calendar.push(dayCounter++);
+      }
+    }
+    return calendar;
+  };
 
-    return (
-      <div className="relative">
-            <input
-                type="text"
-                readOnly
-                value={selectedDate.toLocaleDateString('id-ID')}
-                onClick={() => setShowDatePicker(true)}
-                className="w-full border border-gray-300 rounded-md p-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 cursor-pointer text-gray-800"
-            />
-            {showDatePicker && (
-                <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[9999]" onClick={() => setShowDatePicker(false)}>
-                     
-                     <div className="bg-white border rounded-lg shadow-lg p-4 w-80"
-                    style={{
-                            width: 300,
-                            textAlign: "center",
-                            border: "3px solid #00427c",
-                        }}
-                    onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
-                            <button onClick={prevMonth} className="text-[#0B3D91] font-bold text-lg hover:bg-gray-100 px-2 rounded">‹</button>
-                            <span className="font-semibold text-[#0B3D91]">
-                                {currentDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
-                            </span>
-                            <button onClick={nextMonth} className="text-[#0B3D91] font-bold text-lg hover:bg-gray-100 px-2 rounded">›</button>
-                        </div>  
+  const calendarDays = generateCalendar();
 
-                        {/* Day headers */}
-                        <div className="grid grid-cols-7 gap-1 mb-2">
-                            {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
-                                <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">
-                                    {day}
-                                </div>
-                            ))}
-                        </div>  
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        readOnly
+        value={selectedDate.toLocaleDateString('id-ID')}
+        onClick={() => setShowDatePicker(true)}
+        className="w-full border border-gray-300 rounded-md p-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 cursor-pointer text-gray-800"
+      />
+      {showDatePicker && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[9999]" onClick={() => setShowDatePicker(false)}>
 
-                        {/* Calendar grid */}
-                        <div className="grid grid-cols-7 gap-1">
-                            {calendarDays.map((day, index) => {
-                                const isSelected = day && selectedDate.getDate() === day &&
-                                                 selectedDate.getMonth() === currentDate.getMonth() &&
-                                                 selectedDate.getFullYear() === currentDate.getFullYear();
-                                const isToday = day && new Date().getDate() === day &&
-                                              new Date().getMonth() === currentDate.getMonth() &&
-                                              new Date().getFullYear() === currentDate.getFullYear();
-                                const dateObj = day ? new Date(currentDate.getFullYear(), currentDate.getMonth(), day) : null;
-                                
+          <div className="bg-white border rounded-lg shadow-lg p-4 w-80"
+            style={{
+              width: 300,
+              textAlign: "center",
+              border: "3px solid #00427c",
+            }}
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <button onClick={prevMonth} className="text-[#0B3D91] font-bold text-lg hover:bg-gray-100 px-2 rounded">‹</button>
+              <span className="font-semibold text-[#0B3D91]">
+                {currentDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+              </span>
+              <button onClick={nextMonth} className="text-[#0B3D91] font-bold text-lg hover:bg-gray-100 px-2 rounded">›</button>
+            </div>
 
-                                return (
-                                  <button
-                                        key={index}
-                                        onClick={() => day && handleDateClick(day)}
-                                        disabled={!day}
-                                        className={`
+            {/* Day headers */}
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
+                <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar grid */}
+            <div className="grid grid-cols-7 gap-1">
+              {calendarDays.map((day, index) => {
+                const isSelected = day && selectedDate.getDate() === day &&
+                  selectedDate.getMonth() === currentDate.getMonth() &&
+                  selectedDate.getFullYear() === currentDate.getFullYear();
+                const isToday = day && new Date().getDate() === day &&
+                  new Date().getMonth() === currentDate.getMonth() &&
+                  new Date().getFullYear() === currentDate.getFullYear();
+                const dateObj = day ? new Date(currentDate.getFullYear(), currentDate.getMonth(), day) : null;
+
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => day && handleDateClick(day)}
+                    disabled={!day}
+                    className={`
                                             w-8 h-8 text-sm rounded-md transition-colors
                                             ${!day ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100'}
                                             ${isSelected ? 'bg-[#0B3D91] text-white font-bold' :
-                                              isToday ? 'bg-blue-100 text-blue-600 font-semibold' :
-                                              day ? 'text-gray-700' : 'text-gray-300'}
+                        isToday ? 'bg-blue-100 text-blue-600 font-semibold' :
+                          day ? 'text-gray-700' : 'text-gray-300'}
                                         `}
-                                        style={{
-                                            
-                                        }}
-                                    >
-                                        {day}
-                                    </button>
-                                        );
-                              })}
-                          </div>
+                    style={{
 
-                          <div className="flex justify-end mt-4">
-                            <button
-                                onClick={() => setShowDatePicker(false)}
+                    }}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
 
-                                className="border border-red-600 text-red-600 px-3 py-1 rounded"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                )}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowDatePicker(false)}
+
+                className="border border-red-600 text-red-600 px-3 py-1 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
-    );
+      )}
+    </div>
+  );
 };
-  
-    
+
+
 
 export default function Index() {
   const { tamu } = (usePage().props as unknown) as { tamu: any };
@@ -243,14 +243,15 @@ export default function Index() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // ✅ Convert waktu ke format 24 jam sebelum kirim ke backend
     const payload = {
       nama: form.nama,
       jabatan: form.jabatan,
       instansi: form.instansi,
       tujuan: form.tujuan,
-      tanggal_kunjungan: form.tanggal_kunjungan.toISOString().split("T")[0],
+      // Fix: Use local date string to prevent timezone shifts
+      tanggal_kunjungan: `${form.tanggal_kunjungan.getFullYear()}-${String(form.tanggal_kunjungan.getMonth() + 1).padStart(2, '0')}-${String(form.tanggal_kunjungan.getDate()).padStart(2, '0')}`,
       jam_mulai: convertTo24Hour(form.jam_mulai),
       jam_selesai: convertTo24Hour(form.jam_selesai),
     };
@@ -391,9 +392,8 @@ export default function Index() {
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className={`px-4 py-2 rounded-lg border ${
-                page === 1 ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-100"
-              }`}
+              className={`px-4 py-2 rounded-lg border ${page === 1 ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-100"
+                }`}
             >
               « Sebelumnya
             </button>
@@ -405,9 +405,8 @@ export default function Index() {
             <button
               disabled={page === totalPages}
               onClick={() => setPage(page + 1)}
-              className={`px-4 py-2 rounded-lg border ${
-                page === totalPages ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-100"
-              }`}
+              className={`px-4 py-2 rounded-lg border ${page === totalPages ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-100"
+                }`}
             >
               Berikutnya »
             </button>
@@ -483,14 +482,14 @@ export default function Index() {
                   <CircularDatePicker
                     selectedDate={form.tanggal_kunjungan}
                     onDateChange={(date: Date) =>
-                    setForm((prev) => ({
-                    ...prev,
-                    tanggal: date,
-                    }))
+                      setForm((prev) => ({
+                        ...prev,
+                        tanggal: date,
+                      }))
                     }
-                    />
+                  />
 
-                    <FaCalendarAlt className="absolute right-3 top-3 text-[#0B3D91]" />
+                  <FaCalendarAlt className="absolute right-3 top-3 text-[#0B3D91]" />
                 </div>
 
                 <div>
@@ -616,11 +615,10 @@ export default function Index() {
                     position: "absolute",
                     top: "50%",
                     left: "50%",
-                    transform: `rotate(${
-                      pickerStep === "hour"
+                    transform: `rotate(${pickerStep === "hour"
                         ? (selectedHour % 12) * 30
                         : selectedMinute * 6
-                    }deg)`,
+                      }deg)`,
                     transformOrigin: "center center",
                     transition: "transform 0.35s ease-in-out",
                   }}
@@ -657,21 +655,19 @@ export default function Index() {
               {/* AM / PM */}
               <div className="mt-3">
                 <button
-                  className={`px-3 py-1 rounded mr-2 ${
-                    ampm === "AM"
+                  className={`px-3 py-1 rounded mr-2 ${ampm === "AM"
                       ? "bg-[#00427c] text-white"
                       : "border border-[#00427c] text-[#00427c]"
-                  }`}
+                    }`}
                   onClick={() => setAmpm("AM")}
                 >
                   AM
                 </button>
                 <button
-                  className={`px-3 py-1 rounded ${
-                    ampm === "PM"
+                  className={`px-3 py-1 rounded ${ampm === "PM"
                       ? "bg-[#00427c] text-white"
                       : "border border-[#00427c] text-[#00427c]"
-                  }`}
+                    }`}
                   onClick={() => setAmpm("PM")}
                 >
                   PM

@@ -19,10 +19,17 @@ class DashboardController extends Controller
         // Hitung jadwal yang belum selesai atau masih proses
         $rapatTertunda = JadwalRapat::whereIn('status', ['Belum', 'Proses'])->count();
 
+        // Ambil data jadwal untuk tabel
+        $jadwal = JadwalRapat::with('room')
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('jam_mulai', 'asc')
+            ->get();
+
         return Inertia::render('Dashboard', [
             'totalJadwal' => $totalJadwal,
             'rapatSelesai' => $rapatSelesai,
             'rapatTertunda' => $rapatTertunda,
+            'jadwal' => $jadwal,
         ]);
     }
 }

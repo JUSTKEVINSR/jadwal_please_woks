@@ -261,7 +261,7 @@ export default function Index() {
                         className={`${settings?.cycle_duration > 0 ? 'bg-green-600 hover:bg-green-700' : 'bg-[#0B3D91] hover:bg-[#001f45]'} text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors`}
                     >
 
-                        <FaArrowRotateRight /> Cycle: {settings?.cycle_duration > 0 ? `${settings.cycle_duration}m` : 'Off'}
+                        <FaArrowRotateRight /> Cycle: {settings?.cycle_duration > 0 ? `${settings.cycle_duration}` : 'Off'}
                     </button>
 
 
@@ -507,22 +507,27 @@ export default function Index() {
 
                                 {/* Duration Selection */}
                                 <div className="grid grid-cols-2 gap-2">
-                                    {[0, 5, 10, 30].map((min) => (
-                                        <label key={min} className="flex items-center gap-2 cursor-pointer bg-gray-50 p-2 rounded border hover:bg-gray-100">
+                                    {[0, 30, 300, 600, 1800].map((sec) => (
+                                        <label key={sec} className="flex items-center gap-2 cursor-pointer bg-gray-50 p-2 rounded border hover:bg-gray-100">
                                             <input
                                                 type="radio"
                                                 name="cycle_duration"
-                                                value={min}
-                                                checked={cycleDuration === min}
-                                                onChange={() => setCycleDuration(min)}
+                                                value={sec}
+                                                checked={cycleDuration === sec}
+                                                onChange={() => setCycleDuration(sec)}
                                             />
-                                            <span>{min === 0 ? 'Off' : `${min} Menit`}</span>
+                                            <span>
+                                                {sec === 0 ? 'Off' :
+                                                    sec < 60 ? `${sec} Detik` :
+                                                        `${sec / 60} Menit`
+                                                }
+                                            </span>
                                         </label>
                                     ))}
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-xs text-gray-500">Custom (Menit)</label>
+                                    <label className="text-xs text-gray-500">Custom (Detik)</label>
                                     <input
                                         type="number"
                                         value={cycleDuration}

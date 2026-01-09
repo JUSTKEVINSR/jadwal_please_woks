@@ -20,9 +20,10 @@ interface Props {
   onPageChange?: (current: number, total: number) => void;
   deviceType?: 'mobile' | 'desktop' | 'tv-small' | 'tv-large';
   visibleLimit?: number; // optional: limit how many rows to render (e.g., top 5)
+  showExtraColumns?: boolean;
 }
 
-const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 'desktop', visibleLimit }) => {
+const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 'desktop', visibleLimit, showExtraColumns = false }) => {
   // ✅ Sesuaikan rows per page berdasarkan device
   const getMaxRows = () => {
     if (deviceType === 'mobile') return 20; // Mobile bisa scroll, tampilkan semua
@@ -144,7 +145,7 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
 
 
   // Show only N rows at a time, auto-rotate every 10 seconds
-  const VISIBLE_LIMIT = typeof visibleLimit === 'number' ? visibleLimit : 5;
+  const VISIBLE_LIMIT = typeof visibleLimit === 'number' ? visibleLimit : 6;
   const [visibleGroup, setVisibleGroup] = useState(0);
   const totalGroups = Math.ceil(flatRows.length / VISIBLE_LIMIT);
 
@@ -255,28 +256,41 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
       }} />
 
       <div className={deviceType === 'mobile' ? 'overflow-x-auto' : ''}>
-
-        <div className="bg-gradient-to-br from-[#c4cfe2] to-[#4d8be9] rounded-2xl text-white flex flex-col items-center justify-center 
+        {!showExtraColumns && (
+          <div className="bg-gradient-to-br from-[#c4cfe2] to-[#4d8be9] rounded-2xl text-white flex flex-col items-center justify-center 
            shadow-xl relative overflow-hidden h-[50px]">
 
-          <h2 className={getTVTextSize("text-lg md:text-2xl font-bold z-10")}>
-            Upcoming Meetings
-          </h2>
+            <h2 className={getTVTextSize("text-lg md:text-2xl font-bold z-10")}>
+              Upcoming Meetings
+            </h2>
 
-        </div>
-
+          </div>
+        )}
         <table className={`min-w-full border border-gray-300 text-black bg-white rounded-xl overflow-hidden ${deviceType === 'mobile' ? 'mobile-table' : getTVTextSize("text-xs md:text-sm")
           }`}>
 
           <thead className={getTVTextSize("bg-[#0B3D91] text-white text-sm md:text-base")}>
             <tr>
               {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-no p-1' : 'p-1.5 md:p-2 w-[40px] md:w-[50px]'}`}>No</th> */}
-              {/* <th className={`border ${deviceType === 'mobile' ? 'mobile-col-tanggal p-1' : 'p-1.5 md:p-2 w-[160px] md:w-[200px]'}`}>Tanggal</th> */}
-              {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-pukul p-1' : 'p-1.5 md:p-2 w-[110px] md:w-[130px]'}`}>Pukul</th>*/}
+
+              {/* 
+              {showExtraColumns && (
+                <th className={`border ${deviceType === 'mobile' ? 'mobile-col-tanggal p-1' : 'p-1.5 md:p-2 w-[160px] md:w-[200px]'}`}>Tanggal</th>
+              )}
+
+              {!showExtraColumns && (
+                <th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-pukul p-1' : 'p-1.5 md:p-2 w-[110px] md:w-[130px]'}`}>Pukul</th>
+              )}*/}
+
               {/*<th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2'}`}>Judul</th>*/}
               {/*th className={`border ${deviceType === 'mobile' ? 'mobile-col-judul p-1' : 'p-1.5 md:p-2 w-[200px] md:w-[380px]'}`}>AGENDA</th>*/}
               {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-lokasi p-1' : 'p-1.5 md:p-2 w-[90px] md:w-[110px]'}`}>Lokasi</th>*/}
-              {/*<th className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Gunakan Zoom</th>*/}
+
+              {/* 
+              {showExtraColumns && (
+                <th className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Gunakan Zoom</th>
+              )}*/}
+
               {/*<th className={`border ${deviceType === 'mobile' ? 'mobile-col-keterangan p-1' : 'p-1.5 md:p-2'}`}>Keterangan</th>*/}
               {/*<th className={`border text-center ${deviceType === 'mobile' ? 'mobile-col-status p-1' : 'p-1.5 md:p-2 w-[80px] md:w-[100px]'}`}>Status</th>*/}
             </tr>
@@ -298,6 +312,27 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
                   style={{ height: rowHeight }}
                 >
                   {/*<td>{no}</td> ROWS */}
+
+                  {showExtraColumns && (
+                    <td
+                      className={`border font-semibold text-black ${deviceType === 'mobile' ? 'p-1 text-[10px]' : deviceType === 'tv-small' ? 'p-2 text-sm' : deviceType === 'tv-large' ? 'p-3 text-base' : 'p-1.5 md:p-2 text-xs md:text-sm'
+                        }`}
+                      style={{
+                        verticalAlign: 'middle',
+                        height: rowHeight
+                      }}
+                    >
+                      {deviceType === 'mobile'
+                        ? new Date(row.tanggal).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
+                        : formatDateIndo(row.tanggal)
+                      }
+                      <div>
+                        {formatTime(row.data.jam_mulai)} – {formatTime(row.data.jam_selesai)}
+                      </div>
+
+
+                    </td>
+                  )}
 
                   {/* {row.isFirstOfDate && (
                   <>
@@ -332,10 +367,12 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
                   </>
                 )} */}
 
-                  <td className={`border text-center font-semibold text-[#002D62] whitespace-nowrap ${deviceType === 'mobile' ? 'p-1 text-[9px]' : 'p-1.5 md:p-2 text-[10px] md:text-xs'
-                    }`}>
-                    {formatTime(row.data.jam_mulai)} – {formatTime(row.data.jam_selesai)}
-                  </td>
+                  {!showExtraColumns && (
+                    <td className={`border text-center font-semibold text-[#002D62] whitespace-nowrap ${deviceType === 'mobile' ? 'p-1 text-[9px]' : 'p-1.5 md:p-2 text-[10px] md:text-xs'
+                      }`}>
+                      {formatTime(row.data.jam_mulai)} – {formatTime(row.data.jam_selesai)}
+                    </td>
+                  )}
 
                   {/* JUDUL - dengan scrolling text */}
                   <td className={`border ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
@@ -357,18 +394,18 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
                   </div>
                 </td>*/}
 
-                  {/* GUNAKAN ZOOM 
-                <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
-                  <span className={`px-1.5 rounded-full font-semibold whitespace-nowrap ${
-                    deviceType === 'mobile' ? 'py-0.5 text-[8px]' : 'py-0.5 md:py-1 text-[10px] md:text-xs'
-                  } ${
-                    row.data.gunakan_zoom === "yes"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-300 text-gray-800"
-                  }`}>
-                    {row.data.gunakan_zoom === "yes" ? "Ya" : "Tidak"}
-                  </span>
-                </td>*/}
+
+                  {showExtraColumns && (
+                    <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
+                      <span className={`px-1.5 rounded-full font-semibold whitespace-nowrap ${deviceType === 'mobile' ? 'py-0.5 text-[8px]' : 'py-0.5 md:py-1 text-[10px] md:text-xs'
+                        } ${row.data.gunakan_zoom === "yes"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-300 text-gray-800"
+                        }`}>
+                        {row.data.gunakan_zoom === "yes" ? "Ya" : "Tidak"}
+                      </span>
+                    </td>
+                  )}
 
                   {/* KETERANGAN - dengan scrolling text 
                 <td className={`border ${deviceType === 'mobile' ? 'p-1 max-w-[130px]' : 'p-1.5 md:p-2 max-w-[180px] md:max-w-[250px]'}`}>

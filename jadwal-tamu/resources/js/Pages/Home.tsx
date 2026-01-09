@@ -81,11 +81,11 @@ export default function Home({ canLogin, jadwal, videos, settings }: Props) {
         if (settings.cycle_duration > 0 && orderedVideos.length > 1) {
             const timer = setInterval(() => {
                 setCurrentVideoIndex((prev) => (prev + 1) % orderedVideos.length);
-            }, settings.cycle_duration * 60 * 1000);
+            }, settings.cycle_duration * 1000); // ✅ settings.cycle_duration now in seconds
 
             return () => clearInterval(timer);
         }
-    }, [settings.cycle_duration, orderedVideos]);
+    }, [settings.cycle_duration, orderedVideos, currentVideoIndex]); // ✅ Reset timer on slide change
 
     const handleVideoEnd = () => {
         if (orderedVideos.length > 1) {
@@ -257,7 +257,7 @@ export default function Home({ canLogin, jadwal, videos, settings }: Props) {
         // Tambahkan rel=0 dan enablejsapi=1 agar bisa handle end event jika memakai API YouTube (tapi di sini simple logic)
         const muteParam = settings.is_muted ? '1' : '0';
         const controlsParam = settings.show_youtube_hud ? '1' : '0';
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=${controlsParam}&loop=${settings.cycle_duration > 0 ? '0' : '1'}&playlist=${videoId}`;
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=${controlsParam}&loop=${orderedVideos.length === 1 ? '1' : '0'}&playlist=${videoId}`;
     };
 
     // ✅ Tentukan apakah bisa scroll (hanya mobile)
@@ -369,7 +369,7 @@ export default function Home({ canLogin, jadwal, videos, settings }: Props) {
                             <div
                                 className="bg-gradient-to-br from-[#0B3D91] to-[#1E5BB8] rounded-2xl 
                                             text-white flex flex-col items-center justify-center 
-                                            shadow-xl relative overflow-hidden h-[200px] "
+                                            shadow-xl relative overflow-hidden h-[165px] "
                             >
                                 {/* Dekorasi background */}
                                 <div className="absolute inset-0 opacity-10">
@@ -392,7 +392,7 @@ export default function Home({ canLogin, jadwal, videos, settings }: Props) {
                                 </div>
                             </div>
 
-                            {/* Video Player - DENGAN BORDER BIRU TAPI VIDEO FULL */}
+                            {/* jadwal Player - DENGAN BORDER FULL */}
                             <div className="bg-gradient-to-br from-[#c4cfe2] to-[#4d8be9] rounded-2xl shadow-xl p-1 overflow-hidden h-[180px] md:flex-1">
                                 {/* Tabel */}
                                 <div className={`rounded-xl bg-blue shadow-inner ${canScroll ? 'overflow-visible' : 'flex-1 overflow-hidden min-h-0'}`}>
@@ -408,7 +408,6 @@ export default function Home({ canLogin, jadwal, videos, settings }: Props) {
                                         />
                                     </div>
                                 </div>
-
                             </div>
 
                         </div>
@@ -452,7 +451,7 @@ export default function Home({ canLogin, jadwal, videos, settings }: Props) {
                                                 src={currentVideo.url}
                                                 autoPlay
                                                 muted={settings.is_muted}
-                                                loop={settings.cycle_duration === 0}
+                                                loop={orderedVideos.length === 1}
                                                 onEnded={handleVideoEnd}
                                                 playsInline
                                                 className="w-full h-full object-cover"

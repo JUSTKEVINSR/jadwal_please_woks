@@ -28,13 +28,19 @@ console.log('Bootstrap: Initializing Echo with config:', {
     scheme: import.meta.env.VITE_REVERB_SCHEME
 });
 
+// Check if we are on the Cloudflare Tunnel
+const isCloudflare = window.location.hostname.includes('trycloudflare.com');
+const reverbHost = isCloudflare ? 'classification-flower-width-proxy.trycloudflare.com' : import.meta.env.VITE_REVERB_HOST;
+const reverbPort = isCloudflare ? 443 : import.meta.env.VITE_REVERB_PORT;
+const reverbScheme = isCloudflare ? 'https' : (import.meta.env.VITE_REVERB_SCHEME ?? 'http');
+
 window.Echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
-    wsHost: import.meta.env.VITE_REVERB_HOST,
-    wsPort: import.meta.env.VITE_REVERB_PORT,
-    wssPort: import.meta.env.VITE_REVERB_PORT,
-    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'http') === 'https',
+    wsHost: reverbHost,
+    wsPort: reverbPort,
+    wssPort: reverbPort,
+    forceTLS: reverbScheme === 'https',
     enabledTransports: ['ws', 'wss'],
 });
 
