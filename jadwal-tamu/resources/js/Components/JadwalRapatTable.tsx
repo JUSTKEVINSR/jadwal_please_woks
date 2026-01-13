@@ -204,7 +204,7 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
           }
           
           .animate-marquee {
-            animation: marquee 15s linear infinite;
+            animation: marquee 30s linear infinite;
           }
           
           .animate-marquee:hover {
@@ -395,24 +395,30 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
                 </td>*/}
 
 
-                  {showExtraColumns && (
-                    <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
-                      <span className={`px-1.5 rounded-full font-semibold whitespace-nowrap ${deviceType === 'mobile' ? 'py-0.5 text-[8px]' : 'py-0.5 md:py-1 text-[10px] md:text-xs'
-                        } ${row.data.gunakan_zoom === "yes"
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-300 text-gray-800"
-                        }`}>
-                        {row.data.gunakan_zoom === "yes" ? "Ya" : "Tidak"}
-                      </span>
-                    </td>
-                  )}
+                  {
+                    showExtraColumns && (
+                      <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
+                        <span className={`px-1.5 rounded-full font-semibold whitespace-nowrap ${deviceType === 'mobile' ? 'py-0.5 text-[8px]' : 'py-0.5 md:py-1 text-[10px] md:text-xs'
+                          } ${row.data.gunakan_zoom === "yes"
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-300 text-gray-800"
+                          }`}>
+                          {row.data.gunakan_zoom === "yes" ? "Ya" : "Tidak"}
+                        </span>
+                      </td>
+                    )
+                  }
 
-                  {/* KETERANGAN - dengan scrolling text 
-                <td className={`border ${deviceType === 'mobile' ? 'p-1 max-w-[130px]' : 'p-1.5 md:p-2 max-w-[180px] md:max-w-[250px]'}`}>
-                  <div className={`leading-snug ${deviceType === 'mobile' ? 'text-[9px]' : 'text-xs md:text-sm'}`}>
-                    <ScrollingText text={row.data.keterangan || "-"} maxLength={deviceType === 'mobile' ? 15 : 30} />
-                  </div>
-                </td>*/}
+                  {/* KETERANGAN - dengan scrolling text */}
+                  {
+                    showExtraColumns && (
+                      <td className={`border ${deviceType === 'mobile' ? 'p-1 max-w-[130px]' : 'p-1.5 md:p-2 max-w-[180px] md:max-w-[250px]'}`}>
+                        <div className={`leading-snug ${deviceType === 'mobile' ? 'text-[9px]' : 'text-xs md:text-sm'}`}>
+                          <ScrollingText text={row.data.keterangan || "-"} maxLength={deviceType === 'mobile' ? 15 : 30} />
+                        </div>
+                      </td>
+                    )
+                  }
 
                   {/* STATUS 
                 <td className={`border text-center ${deviceType === 'mobile' ? 'p-1' : 'p-1.5 md:p-2'}`}>
@@ -436,7 +442,7 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
           </tbody>
         </table>
       </div>
-    </div>
+    </div >
   );
 };
 

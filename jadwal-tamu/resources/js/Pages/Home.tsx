@@ -34,6 +34,7 @@ interface VideoSetting {
     cycle_duration: number;
     is_shuffle: boolean;
     is_muted: boolean;
+    is_looped: boolean;
     show_youtube_hud: boolean;
 }
 
@@ -257,7 +258,8 @@ export default function Home({ canLogin, jadwal, videos, settings }: Props) {
         // Tambahkan rel=0 dan enablejsapi=1 agar bisa handle end event jika memakai API YouTube (tapi di sini simple logic)
         const muteParam = settings.is_muted ? '1' : '0';
         const controlsParam = settings.show_youtube_hud ? '1' : '0';
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=${controlsParam}&loop=${orderedVideos.length === 1 ? '1' : '0'}&playlist=${videoId}`;
+        const loopParam = (settings.is_looped || orderedVideos.length === 1) ? '1' : '0';
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=${controlsParam}&loop=${loopParam}&playlist=${videoId}`;
     };
 
     // ✅ Tentukan apakah bisa scroll (hanya mobile)
@@ -447,11 +449,11 @@ export default function Home({ canLogin, jadwal, videos, settings }: Props) {
                                             )
                                         ) : (
                                             <video
-                                                key={`${currentVideo.id}-${settings.is_muted}`} // ✅ Force reload on cycle OR mute change
+                                                key={`${currentVideo.id}-${settings.is_muted}-${settings.is_looped}`} // ✅ Force reload on cycle OR mute change
                                                 src={currentVideo.url}
                                                 autoPlay
                                                 muted={settings.is_muted}
-                                                loop={orderedVideos.length === 1}
+                                                loop={settings.is_looped || orderedVideos.length === 1}
                                                 onEnded={handleVideoEnd}
                                                 playsInline
                                                 className="w-full h-full object-cover"

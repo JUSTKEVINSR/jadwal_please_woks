@@ -13,12 +13,14 @@ class VideoSetting extends Model
         'cycle_duration',
         'is_shuffle',
         'is_muted',
+        'is_looped',
         'show_youtube_hud',
     ];
 
     protected $casts = [
         'is_shuffle' => 'boolean',
         'is_muted' => 'boolean',
+        'is_looped' => 'boolean',
         'show_youtube_hud' => 'boolean',
     ];
 
@@ -31,6 +33,7 @@ class VideoSetting extends Model
             'cycle_duration' => 0,
             'is_shuffle' => false,
             'is_muted' => true,
+            'is_looped' => false,
             'show_youtube_hud' => false,
         ]);
     }

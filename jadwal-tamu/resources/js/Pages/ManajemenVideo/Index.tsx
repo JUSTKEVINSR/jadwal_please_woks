@@ -5,7 +5,7 @@ import { usePage } from "@inertiajs/react";
 import { FaPhotoVideo, FaPlus, FaTrash, FaCalendarAlt } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaArrowRotateRight, FaShuffle, FaYoutube, FaMusic } from "react-icons/fa6";
+import { FaArrowRotateRight, FaShuffle, FaYoutube, FaMusic, FaRepeat } from "react-icons/fa6";
 import CircularDatePicker from "@/Components/CircularDatePicker";
 
 interface Video {
@@ -154,6 +154,16 @@ export default function Index() {
         });
     };
 
+    const handleToggleLoop = () => {
+        router.patch(route('manajemen-video.update-settings'), {
+            is_looped: !settings.is_looped
+        }, {
+            onSuccess: () => {
+                toast.info(`🔄 Loop Video ${!settings.is_looped ? 'Aktif' : 'Nonaktif'}`);
+            }
+        });
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const formData = new FormData();
@@ -262,6 +272,16 @@ export default function Index() {
                     >
 
                         <FaArrowRotateRight /> Cycle: {settings?.cycle_duration > 0 ? `${settings.cycle_duration}` : 'Off'}
+                    </button>
+
+                    {/* Button loop video */}
+
+                    <button
+                        onClick={handleToggleLoop}
+                        className={`${settings?.is_looped ? 'bg-green-600 hover:bg-green-700' : 'bg-[#0B3D91] hover:bg-[#001f45]'} text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors`}
+                    >
+
+                        <FaRepeat /> Loop: {settings?.is_looped ? 'On' : 'Off'}
                     </button>
 
 

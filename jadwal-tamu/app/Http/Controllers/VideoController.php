@@ -202,6 +202,7 @@ class VideoController extends Controller
             'cycle_duration' => 'nullable|integer|min:0',
             'is_shuffle' => 'nullable|boolean',
             'is_muted' => 'nullable|boolean',
+            'is_looped' => 'nullable|boolean',
             'show_youtube_hud' => 'nullable|boolean',
         ]);
 
