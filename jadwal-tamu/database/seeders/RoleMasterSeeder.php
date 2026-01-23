@@ -20,7 +20,7 @@ class RoleMasterSeeder extends Seeder
                 'updated_at' => now(),
             ]
         );
-        
+
         \DB::table('role_master')->updateOrInsert(
             ['role_code' => 1969],
             [
@@ -29,7 +29,7 @@ class RoleMasterSeeder extends Seeder
                 'updated_at' => now(),
             ]
         );
-        
+
         \DB::table('role_master')->updateOrInsert(
             ['role_code' => 8008],
             [
@@ -38,11 +38,20 @@ class RoleMasterSeeder extends Seeder
                 'updated_at' => now(),
             ]
         );
-        
+
         \DB::table('role_master')->updateOrInsert(
             ['role_code' => 880],
             [
                 'name' => 'kasubak',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        \DB::table('role_master')->updateOrInsert(
+            ['role_code' => 2026],
+            [
+                'name' => 'PIC',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]

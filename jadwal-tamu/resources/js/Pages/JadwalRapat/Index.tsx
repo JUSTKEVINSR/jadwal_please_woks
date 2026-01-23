@@ -9,6 +9,7 @@ import {
     FaTrash,
     FaEdit,
 } from "react-icons/fa";
+import { GoChecklist } from "react-icons/go";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { router, usePage } from "@inertiajs/react";
@@ -33,20 +34,20 @@ interface JadwalRapat {
 
 
 export default function Index() {
-    const { jadwal, statusFilter, rooms, auth } = usePage().props as any;
+    const { jadwal, statusFilter, rooms, auth, autoApproveStatus } = usePage().props as any;
     const [filter, setFilter] = useState(statusFilter);
 
     // Check if the user has the required role to edit or delete any jadwal rapat
-    const canEditAnyJadwal = auth.user && ['admin', 'ula', 'kasubak'].includes(auth.user.role);
+    const canEditAnyJadwal = auth.user && ['admin', 'ula', 'kasubak', 'pic'].includes(auth.user.role);
 
     // Check if the user has the required role to interact with Kasubak dropdown
-    const canInteractWithKasubak = auth.user && ['admin', 'kasubak'].includes(auth.user.role);
+    const canInteractWithKasubak = auth.user && ['admin', 'kasubak', 'pic'].includes(auth.user.role);
 
     // Check if the user has the required role to interact with Ula dropdown
-    const canInteractWithUla = auth.user && ['admin', 'ula'].includes(auth.user.role);
+    const canInteractWithUla = auth.user && ['admin', 'ula', 'pic'].includes(auth.user.role);
 
     // Check if the user has the required role to interact with only Admin
-    const canInteractWithOnlyAdmin = auth.user && ['admin'].includes(auth.user.role);
+    const canInteractWithOnlyAdmin = auth.user && ['admin', 'pic'].includes(auth.user.role);
 
 
 
@@ -137,6 +138,27 @@ export default function Index() {
         });
     };
 
+    // ✅ State for Auto Approve (Synced with Backend Prop)
+    const [isAutoApprove, setIsAutoApprove] = useState(autoApproveStatus || false);
+
+    useEffect(() => {
+        setIsAutoApprove(autoApproveStatus);
+    }, [autoApproveStatus]);
+
+    const handleToggleAutoApprove = () => {
+        router.post('/jadwal-rapat/toggle-auto-approve', {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Toast handled by backend flash message ideally, but we can add one here too if needed
+                // Based on user request "dont forget the tosaster"
+                toast.success(`Auto Approve is now ${!isAutoApprove ? 'ON' : 'OFF'}`);
+            },
+            onError: () => {
+                toast.error("Failed to toggle Auto Approve");
+            }
+        });
+    };
+
     const handleAdd = () => {
         setForm({
             tanggal: new Date(),
@@ -149,8 +171,8 @@ export default function Index() {
             gunakan_zoom: "no",
             nama_pic: "",
             nomor_pic: "",
-            kasubak: "pending",
-            ula: "pending",
+            kasubak: isAutoApprove ? "approve" : "pending",
+            ula: isAutoApprove ? "approve" : "pending",
         });
         setModalMode("add");
         setShowModal(true);
@@ -546,6 +568,20 @@ export default function Index() {
                             </button>
                         ))}
                     </div>
+
+                    {/* Button Auto Approve - Visible ONLY to Role Code 1945 */}
+                    {Number(auth.user?.role_code) === 1945 && (
+                        <button
+                            onClick={handleToggleAutoApprove}
+                            className={`font-medium px-3 md:px-4 py-2 text-sm md:text-base rounded-md flex items-center gap-2 shadow-md transition-all ${isAutoApprove
+                                    ? "bg-green-600 hover:bg-green-700 text-white ring-2 ring-green-300" // Active User State
+                                    : "bg-gray-200 hover:bg-gray-300 text-gray-700" // Inactive State
+                                }`}
+                        >
+                            <GoChecklist className={isAutoApprove ? "text-xl" : ""} />
+                            {isAutoApprove ? "Auto Approve ON" : "Auto Approve OFF"}
+                        </button>
+                    )}
 
                     <button
                         onClick={handleAdd}

@@ -36,6 +36,7 @@ class UserController extends Controller
                     1945 => 'admin',
                     8008 => 'ula',
                     880 => 'kasubak',
+                    2026 => 'pic',
                     default => 'user',
                 },
             ];
@@ -62,7 +63,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users_plus,email',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:user,admin,ula,kasubak',
+            'role' => 'required|in:user,admin,ula,kasubak,pic',
             //'password' => ['required', 'confirmed', Rules\Password::defaults()],
             // Optional: Validate role if your system uses them
             // 'role' => 'required|in:admin,editor,user',
@@ -75,6 +76,7 @@ class UserController extends Controller
                 'admin' => 1945,
                 'ula' => 8008,
                 'kasubak' => 880,
+                'pic' => 2026,
                 default => 1969, // user
             };
             $user = UserPlus::create([
@@ -113,7 +115,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users_plus,email',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:user,admin,ula,kasubak',
+            'role' => 'required|in:user,admin,ula,kasubak,pic',
         ]);
         \Log::info('Validation passed', ['validated' => $validated]);
 
@@ -122,6 +124,7 @@ class UserController extends Controller
             'admin' => 1945,
             'ula' => 8008,
             'kasubak' => 880,
+            'pic' => 2026,
             default => 1969, // user
         };
 
@@ -158,7 +161,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users_plus,email,' . $id,
             'password' => 'nullable|string|min:8',
-            'role' => 'required|in:user,admin,ula,kasubak',
+            'role' => 'required|in:user,admin,ula,kasubak,pic',
         ]);
         \Log::info('Validation passed', ['validated' => $validated]);
 
@@ -167,6 +170,7 @@ class UserController extends Controller
             'admin' => 1945,
             'ula' => 8008,
             'kasubak' => 880,
+            'pic' => 2026,
             default => 1969, // user
         };
 

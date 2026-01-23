@@ -36,7 +36,7 @@ export default function AuthenticatedLayout({
 
   // Now 'user' is correctly typed with the 'role' property
   const user = auth?.user;
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'pic';
   const isUla = user?.role === 'ula';
   const canManageVideos = isAdmin || isUla;
 

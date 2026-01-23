@@ -11,6 +11,8 @@ use App\Events\JadwalRapatCreated;
 use App\Events\JadwalRapatUpdated;
 use App\Events\JadwalRapatDeleted;
 
+use Illuminate\Support\Facades\Cache;
+
 class JadwalRapatController extends Controller
 {
     public function index(Request $request)
@@ -32,7 +34,25 @@ class JadwalRapatController extends Controller
             'auth' => [
                 'user' => $request->user(),
             ],
+            'autoApproveStatus' => Cache::get('jadwal_auto_approve', false),
         ]);
+    }
+
+    public function toggleAutoApprove(Request $request)
+    {
+        $user = $request->user();
+
+        // Check if user has role_code 1945
+        if ($user->role_code !== 1945) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $currentStatus = Cache::get('jadwal_auto_approve', false);
+        $newStatus = !$currentStatus;
+
+        Cache::forever('jadwal_auto_approve', $newStatus);
+
+        return back()->with('message', 'Auto Approve status updated to ' . ($newStatus ? 'ON' : 'OFF'));
     }
 
     public function store(Request $request)
@@ -49,6 +69,7 @@ class JadwalRapatController extends Controller
             'nama_pic' => 'nullable|string',
             'nomor_pic' => 'nullable|string',
             'kasubak' => 'required|in:pending,rejected,approve',
+            'ula' => 'required|in:pending,rejected,approve',
         ]);
 
         // Convert 12-hour input to 24-hour format
@@ -89,11 +110,11 @@ class JadwalRapatController extends Controller
             'user_role' => $user->role,
             'jadwal_user_id' => $jadwalRapat->user_id,
             'is_owner' => $jadwalRapat->user_id === $user->id,
-            'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak']),
+            'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak', 'pic']),
         ]);
 
         // Check if the user is the owner or has the required role
-        if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak'])) {
+        if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak', 'pic'])) {
             abort(403);
         }
 
@@ -142,6 +163,7 @@ class JadwalRapatController extends Controller
             'nama_pic' => 'nullable|string',
             'nomor_pic' => 'nullable|string',
             'kasubak' => 'required|in:pending,rejected,approve',
+            'ula' => 'required|in:pending,rejected,approve',
         ]);
 
         // Convert 12-hour input to 24-hour format
@@ -179,11 +201,11 @@ class JadwalRapatController extends Controller
             'user_role' => $user->role,
             'jadwal_user_id' => $jadwalRapat->user_id,
             'is_owner' => $jadwalRapat->user_id === $user->id,
-            'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak']),
+            'has_required_role' => in_array($user->role, ['admin', 'ula', 'kasubak', 'pic']),
         ]);
 
         // Check if the user is the owner or has the required role
-        if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak'])) {
+        if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak', 'pic'])) {
             abort(403);
         }
 

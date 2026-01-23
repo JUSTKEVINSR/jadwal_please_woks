@@ -20,7 +20,7 @@ interface UserData {
     // State property names match the 'name' attribute in the inputs
     password: string;
     passwordConfirm: string;
-    role: 'user' | 'admin' | 'ula' | 'kasubak';
+    role: 'user' | 'admin' | 'ula' | 'kasubak' | 'pic';
 }
 
 // Define props for the component
@@ -52,7 +52,7 @@ const Create: React.FC<NewUserFormProps> = (props: NewUserFormProps) => {
     const { users, auth } = usePage().props as any;
 
     useEffect(() => {
-        if (auth.user.role !== 'admin') {
+        if (auth.user.role !== 'admin' && auth.user.role !== 'pic') {
             router.visit('/dashboard');
         }
     }, [auth.user.role]);
@@ -275,6 +275,7 @@ const Create: React.FC<NewUserFormProps> = (props: NewUserFormProps) => {
                                     <option value="admin">Admin</option>
                                     <option value="ula">ULA</option>
                                     <option value="kasubak">Kasubak</option>
+                                    <option value="pic">PIC</option>
                                 </select>
                             </div>
 

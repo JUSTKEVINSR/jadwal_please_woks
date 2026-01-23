@@ -43,13 +43,15 @@ class UserPlus extends Authenticatable
             1945 => 'admin',
             8008 => 'ula',
             880 => 'kasubak',
+            2026 => 'pic',
             default => 'user',
         };
     }
 
     public function isAdmin(): bool
     {
-        $isAdmin = $this->role_code === 1945;
+        // Allow both Admin (1945) and PIC (2026) to pass isAdmin check
+        $isAdmin = in_array($this->role_code, [1945, 2026]);
         \Log::info('UserPlus::isAdmin check', [
             'user_id' => $this->id,
             'role_code' => $this->role_code,

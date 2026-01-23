@@ -27,7 +27,7 @@ export default function Index() {
     const { videos, auth, settings } = usePage().props as any;
 
     useEffect(() => {
-        if (auth.user.role !== 'admin' && auth.user.role !== 'ula') {
+        if (auth.user.role !== 'admin' && auth.user.role !== 'ula' && auth.user.role !== 'pic') {
             router.visit('/dashboard');
         }
     }, [auth.user.role]);

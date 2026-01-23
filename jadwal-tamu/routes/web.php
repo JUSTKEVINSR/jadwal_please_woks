@@ -28,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/jadwal-rapat/{jadwalRapat}', [JadwalRapatController::class, 'destroy'])->name('jadwal-rapat.destroy');
     Route::get('/jadwal-rapat/booked-times', [JadwalRapatController::class, 'getBookedTimes'])->name('jadwal-rapat.booked-times');
     Route::get('/jadwal-rapat/booked-dates', [JadwalRapatController::class, 'getBookedDates'])->name('jadwal-rapat.booked-dates');
+    Route::post('/jadwal-rapat/toggle-auto-approve', [JadwalRapatController::class, 'toggleAutoApprove'])->name('jadwal-rapat.toggle-auto-approve');
 });
 // CRUD Daftar Tamu
 // Route::resource('daftar-tamu', DaftarTamuController::class)->middleware(['auth']);
