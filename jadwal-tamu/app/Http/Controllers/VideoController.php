@@ -204,6 +204,7 @@ class VideoController extends Controller
             'is_muted' => 'nullable|boolean',
             'is_looped' => 'nullable|boolean',
             'show_youtube_hud' => 'nullable|boolean',
+            'display_mode' => 'nullable|in:video,image',
         ]);
 
         $settings = VideoSetting::getSettings();

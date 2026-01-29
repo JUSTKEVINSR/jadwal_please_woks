@@ -1,5 +1,5 @@
 import { PropsWithChildren, ReactNode } from "react";
-import { Link, usePage } from "@inertiajs/react";
+import { Link, usePage, router } from "@inertiajs/react";
 //import { User } from "@/types";
 import { User, PageProps } from "@/types";
 
@@ -12,6 +12,7 @@ import {
   FaUserCircle,
   FaTv,
   FaUserPlus,
+  FaImages,
 } from "react-icons/fa";
 
 // Define the interface for the props expected by the Layout
@@ -52,6 +53,7 @@ export default function AuthenticatedLayout({
     ...(canManageVideos ? [
       { name: "TV Mode", href: "/", icon: <FaTv /> },
       { name: "Manajemen Video", href: "/manajemen-video", icon: <FaVideo /> },
+      { name: "Manajemen Gambar", href: "/manajemen-gambar", icon: <FaImages /> },
     ] : []),
 
 
@@ -129,7 +131,23 @@ export default function AuthenticatedLayout({
       {/* ✅ MAIN CONTENT AREA */}
       <div className="flex-1 md:ml-[84px]">
         {/* Navbar */}
-        <nav className="bg-white shadow-sm h-12 flex items-center justify-end px-6 border-b sticky top-0 z-20">
+        <nav className="bg-white shadow-sm h-12 flex items-center justify-end px-6 border-b sticky top-0 z-20 gap-4">
+          {canManageVideos && (
+            <div className="flex bg-gray-100 p-1 rounded-lg">
+              <button
+                onClick={() => router.patch(route('manajemen-video.update-settings'), { display_mode: 'video' })}
+                className={`px-3 py-1 text-xs font-bold rounded-md transition ${(usePage().props as any).settings?.display_mode === 'video' || !(usePage().props as any).settings?.display_mode ? 'bg-[#0B3D91] text-white shadow' : 'text-gray-500 hover:bg-gray-200'}`}
+              >
+                Video Mode
+              </button>
+              <button
+                onClick={() => router.patch(route('manajemen-video.update-settings'), { display_mode: 'image' })}
+                className={`px-3 py-1 text-xs font-bold rounded-md transition ${(usePage().props as any).settings?.display_mode === 'image' ? 'bg-[#0B3D91] text-white shadow' : 'text-gray-500 hover:bg-gray-200'}`}
+              >
+                Image Mode
+              </button>
+            </div>
+          )}
           <Dropdown>
             <Dropdown.Trigger>
               <button className="flex items-center text-blue-700 hover:text-gray-900 font-semibold">

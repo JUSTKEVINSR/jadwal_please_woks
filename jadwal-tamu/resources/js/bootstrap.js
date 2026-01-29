@@ -30,7 +30,7 @@ console.log('Bootstrap: Initializing Echo with config:', {
 
 // Check if we are on the Cloudflare Tunnel
 const isCloudflare = window.location.hostname.includes('trycloudflare.com');
-const reverbHost = isCloudflare ? 'zen-table-alpha-compliant.trycloudflare.com' : import.meta.env.VITE_REVERB_HOST;
+const reverbHost = isCloudflare ? 'gmt-space-governments-algorithm.trycloudflare.com' : import.meta.env.VITE_REVERB_HOST;
 const reverbPort = isCloudflare ? 443 : import.meta.env.VITE_REVERB_PORT;
 const reverbScheme = isCloudflare ? 'https' : (import.meta.env.VITE_REVERB_SCHEME ?? 'http');
 

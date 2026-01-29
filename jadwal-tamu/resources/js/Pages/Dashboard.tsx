@@ -1,18 +1,25 @@
 import { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage, router } from '@inertiajs/react';
+import { Head, usePage, router, useForm } from '@inertiajs/react';
 import { PageProps } from '@/types';
 import JadwalRapatTable from '@/Components/JadwalRapatTable';
+
+interface RunningText {
+  id: number;
+  text: string;
+  is_active: boolean;
+}
 
 interface DashboardProps extends PageProps {
   totalJadwal: number;
   rapatSelesai: number;
   rapatTertunda: number;
   jadwal: any[];
+  runningTexts: RunningText[];
 }
 
 export default function Dashboard() {
-  const { auth, totalJadwal, rapatSelesai, rapatTertunda, jadwal } =
+  const { auth, totalJadwal, rapatSelesai, rapatTertunda, jadwal, runningTexts } =
     usePage().props as unknown as DashboardProps;
 
   const [stats, setStats] = useState({
@@ -24,6 +31,11 @@ export default function Dashboard() {
   const [deviceType, setDeviceType] = useState<'mobile' | 'desktop' | 'tv-small' | 'tv-large'>('desktop');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Form for adding new running text
+  const { data, setData, post, processing, reset, errors } = useForm({
+    text: '',
+  });
 
   useEffect(() => {
     const detectDevice = () => {
@@ -60,6 +72,29 @@ export default function Dashboard() {
     setTotalPages(total);
   };
 
+  const handleAddRunningText = (e: React.FormEvent) => {
+    e.preventDefault();
+    post(route('running-text.store'), {
+      onSuccess: () => reset('text'),
+      preserveScroll: true,
+    });
+  };
+
+  const handleDeleteRunningText = (id: number) => {
+    if (confirm('Apakah anda yakin ingin menghapus text ini?')) {
+      router.delete(route('running-text.destroy', id), {
+        preserveScroll: true,
+      });
+    }
+  };
+
+  const handleToggleRunningText = (id: number) => {
+    router.put(route('running-text.toggle', id), {}, {
+      preserveScroll: true,
+    });
+  };
+
+
   // Real-time updates for dashboard statistics
   useEffect(() => {
     if (window.Echo) {
@@ -95,7 +130,8 @@ export default function Dashboard() {
       <Head title="Dashboard" />
 
       <div className="py-12">
-        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+          {/* Stats Section */}
           <div className="bg-[#B0DAFF] p-7 rounded-2xl shadow-md border border-[#7FB8E5]">
             <div className="p-6 text-blue-900">
               <h1 className="text-2xl font-bold mb-2">
@@ -125,11 +161,63 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="py-12">
-        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          {/* Running Text Management Section */}
+          <div className="bg-white p-7 rounded-2xl shadow-md border border-gray-200">
+            <div className="p-6">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Manajemen Informasi (Running Text)</h2>
+
+              {/* Form */}
+              <form onSubmit={handleAddRunningText} className="mb-6 flex gap-4">
+                <input
+                  type="text"
+                  value={data.text}
+                  onChange={e => setData('text', e.target.value)}
+                  placeholder="Masukkan teks informasi..."
+                  className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  disabled={processing}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  Tambah
+                </button>
+              </form>
+              {errors.text && <div className="text-red-500 text-sm mb-4">{errors.text}</div>}
+
+              {/* List */}
+              <div className="space-y-3">
+                {runningTexts && runningTexts.length > 0 ? (
+                  runningTexts.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                      <span className={`flex-1 font-medium ${!item.is_active ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                        {item.text}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleToggleRunningText(item.id)}
+                          className={`px-3 py-1 rounded text-sm ${item.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+                        >
+                          {item.is_active ? 'Aktif' : 'Non-Aktif'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteRunningText(item.id)}
+                          className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-4">Belum ada running text.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+
           <div className="bg-[#B0DAFF] p-7 rounded-2xl shadow-md border border-[#7FB8E5]">
             <div className="p-6 text-blue-900">
               <h1 className="text-2xl font-bold mb-4">
@@ -148,8 +236,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-
     </AuthenticatedLayout>
   );
 }

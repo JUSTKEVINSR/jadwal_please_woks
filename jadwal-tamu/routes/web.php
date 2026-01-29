@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\JadwalRapatController;
 use App\Http\Controllers\DaftarTamuController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\GambarController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 
@@ -47,6 +48,20 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/manajemen-video/{video}', [VideoController::class, 'destroy'])->name('manajemen-video.destroy');
     Route::put('/manajemen-video/{video}/toggle', [VideoController::class, 'toggleStatus'])->name('manajemen-video.toggle');
     Route::patch('/manajemen-video/settings', [VideoController::class, 'updateSettings'])->name('manajemen-video.update-settings');
+});
+
+// CRUD Manajemen Gambar
+Route::middleware(['auth'])->group(function () {
+    Route::get('/manajemen-gambar', [GambarController::class, 'index'])->name('manajemen-gambar.index');
+    Route::post('/manajemen-gambar', [GambarController::class, 'store'])->name('manajemen-gambar.store');
+    Route::delete('/manajemen-gambar/{gambar}', [GambarController::class, 'destroy'])->name('manajemen-gambar.destroy');
+    Route::put('/manajemen-gambar/{gambar}/toggle', [GambarController::class, 'toggleStatus'])->name('manajemen-gambar.toggle');
+});
+
+// CRUD Running Text
+Route::middleware(['auth'])->group(function () {
+    Route::resource('running-text', \App\Http\Controllers\RunningTextController::class)->only(['store', 'update', 'destroy']);
+    Route::put('/running-text/{runningText}/toggle', [\App\Http\Controllers\RunningTextController::class, 'toggle'])->name('running-text.toggle');
 });
 
 // ===========================

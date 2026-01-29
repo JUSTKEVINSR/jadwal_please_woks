@@ -15,6 +15,7 @@ class VideoSetting extends Model
         'is_muted',
         'is_looped',
         'show_youtube_hud',
+        'display_mode',
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class VideoSetting extends Model
             'is_muted' => true,
             'is_looped' => false,
             'show_youtube_hud' => false,
+            'display_mode' => 'video',
         ]);
     }
 }

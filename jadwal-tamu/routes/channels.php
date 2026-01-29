@@ -26,3 +26,15 @@ Broadcast::channel('public-jadwal-rapat', function () {
 Broadcast::channel('public-videos', function () {
     return true;
 });
+
+Broadcast::channel('public-daftar-tamu', function () {
+    return true;
+});
+
+Broadcast::channel('public-running-text', function () {
+    return true;
+});
+
+Broadcast::channel('public-gambars', function () {
+    return true;
+});

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 //import DatePicker from "react-datepicker";
 //import "react-datepicker/dist/react-datepicker.css";
@@ -7,6 +7,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { usePage, router } from "@inertiajs/react";
 import CircularDatePicker from "@/Components/CircularDatePicker";
+
+declare global {
+  interface Window {
+    Echo: any;
+  }
+}
 
 interface DaftarTamu {
   id?: number;
@@ -21,10 +27,36 @@ interface DaftarTamu {
 
 // CircularDatePicker imported from components
 
-
-
 export default function Index() {
   const { tamu } = (usePage().props as unknown) as { tamu: any };
+
+  // ✅ Real-time Updates
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Echo) {
+      const channel = window.Echo.channel('public-daftar-tamu');
+
+      channel.listen('.daftar-tamu.created', (data: any) => {
+        toast.success(data.message || 'Tamu baru ditambahkan');
+        router.reload({ only: ['tamu'] });
+      });
+
+      channel.listen('.daftar-tamu.updated', (data: any) => {
+        toast.info(data.message || 'Data tamu diperbarui');
+        router.reload({ only: ['tamu'] });
+      });
+
+      channel.listen('.daftar-tamu.deleted', (data: any) => {
+        toast.info(data.message || 'Data tamu dihapus');
+        router.reload({ only: ['tamu'] });
+      });
+
+      return () => {
+        channel.stopListening('.daftar-tamu.created');
+        channel.stopListening('.daftar-tamu.updated');
+        channel.stopListening('.daftar-tamu.deleted');
+      };
+    }
+  }, []);
 
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");

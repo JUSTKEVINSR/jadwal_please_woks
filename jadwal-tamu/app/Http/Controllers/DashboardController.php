@@ -30,6 +30,7 @@ class DashboardController extends Controller
             'rapatSelesai' => $rapatSelesai,
             'rapatTertunda' => $rapatTertunda,
             'jadwal' => $jadwal,
+            'runningTexts' => \App\Models\RunningText::latest()->get(),
         ]);
     }
 }

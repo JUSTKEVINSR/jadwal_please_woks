@@ -43,9 +43,17 @@ class HomeController extends Controller
             ];
         });
 
+        // ✅ Ambil semua gambar aktif
+        $gambarsAktif = \App\Models\Gambar::select('id', 'judul', 'path')
+            ->where('status', 'aktif')
+            ->latest()
+            ->get();
+
         return Inertia::render('Home', [
             'jadwal' => $jadwal,
             'videos' => $videosData,
+            'gambars' => $gambarsAktif,
+            'runningTexts' => \App\Models\RunningText::where('is_active', true)->get(),
             'settings' => \App\Models\VideoSetting::getSettings(),
             'canLogin' => \Route::has('login'),
             'canRegister' => \Route::has('register'),

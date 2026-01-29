@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\DaftarTamu;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Events\DaftarTamuCreated;
+use App\Events\DaftarTamuUpdated;
+use App\Events\DaftarTamuDeleted;
 
 class DaftarTamuController extends Controller
 {
@@ -43,7 +46,9 @@ class DaftarTamuController extends Controller
 
         $validated['user_id'] = auth()->id();
 
-        DaftarTamu::create($validated);
+        $daftarTamu = DaftarTamu::create($validated);
+
+        DaftarTamuCreated::dispatch($daftarTamu);
 
         return redirect()
             ->back()
@@ -73,6 +78,8 @@ class DaftarTamuController extends Controller
 
         $daftarTamu->update($validated);
 
+        DaftarTamuUpdated::dispatch($daftarTamu);
+
         return redirect()
             ->back()
             ->with('message', '✏️ Data tamu berhasil diperbarui');
@@ -90,6 +97,8 @@ class DaftarTamuController extends Controller
         }
 
         $daftarTamu->delete();
+
+        DaftarTamuDeleted::dispatch($daftarTamu->id);
 
         return redirect()
             ->back()
