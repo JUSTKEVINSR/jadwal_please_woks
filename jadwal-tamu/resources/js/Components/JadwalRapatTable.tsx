@@ -145,7 +145,7 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
 
 
   // Show only N rows at a time, auto-rotate every 10 seconds
-  const VISIBLE_LIMIT = typeof visibleLimit === 'number' ? visibleLimit : 2;
+  const VISIBLE_LIMIT = typeof visibleLimit === 'number' ? visibleLimit : 4;
   const [visibleGroup, setVisibleGroup] = useState(0);
   const totalGroups = Math.ceil(flatRows.length / VISIBLE_LIMIT);
 
@@ -255,12 +255,12 @@ const JadwalRapatTable: React.FC<Props> = ({ jadwal, onPageChange, deviceType = 
         `
       }} />
 
-      <div className={deviceType === 'mobile' ? 'overflow-x-auto' : ''}>
+      <div className={deviceType === 'mobile' ? 'overflow-x-auto' : 'flex flex-col gap-2 md:gap-3'}>
         {!showExtraColumns && (
           <div className="bg-gradient-to-br from-[#3f6dc4] to-[#0a6cff] rounded-2xl text-white flex flex-col items-center justify-center 
-           shadow-xl relative overflow-hidden h-[50px]">
+           shadow-xl relative overflow-hidden h-[60px]">
 
-            <h1 className={getTVTextSize("text-lg md:text-2xl font-bold z-10")}>
+            <h1 className={getTVTextSize("text-lg md:text-10xl font-bold z-10")}>
               Upcoming Meetings
             </h1>
 

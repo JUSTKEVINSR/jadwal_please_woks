@@ -435,7 +435,7 @@ export default function Home({ canLogin, jadwal, videos, gambars, runningTexts, 
                 <div className={`relative w-full max-w-[1920px] bg-gradient-to-br from-blue-100 to-blue-100 rounded-3xl shadow-xl flex flex-col p-3 md:p-4 ${canScroll ? 'min-h-screen' : 'h-[95vh]'}`}>
                     {/* Navbar */}
                     <div
-                        className="bg-gradient-to-r from-[#0B3D91] to-[#1E5BB8] rounded-xl px-4 py-2 md:px-6 md:py-3 
+                        className="bg-gradient-to-r from-[#0B3D91] to-[#1E5BB8] rounded-xl px-4 py-10 md:px-6 md:py-3 
               flex justify-between items-center shadow-lg"
                     >
                         <div className="flex items-center gap-2 md:gap-3">
@@ -473,7 +473,7 @@ export default function Home({ canLogin, jadwal, videos, gambars, runningTexts, 
                             <div
                                 className="bg-gradient-to-br from-[#0B3D91] to-[#1E5BB8] rounded-2xl 
                                             text-white flex flex-col items-center justify-center 
-                                            shadow-xl relative overflow-hidden h-[165px] "
+                                            shadow-xl relative overflow-hidden h-[200px] "
                             >
                                 {/* Dekorasi background */}
                                 <div className="absolute inset-0 opacity-10">
@@ -482,7 +482,7 @@ export default function Home({ canLogin, jadwal, videos, gambars, runningTexts, 
                                 </div>
 
                                 <div className="relative z-10 text-center px-4">
-                                    <div className="clock-time text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider mb-1 drop-shadow-lg">
+                                    <div className="clock-time text-7xl md:text-5xl lg:text-6xl font-bold tracking-wider mb-1 drop-shadow-lg">
                                         {hour}
                                         <span className="animate-pulse">:</span>
                                         {minute}
