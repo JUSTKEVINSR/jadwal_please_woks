@@ -13,6 +13,9 @@ import {
   FaTv,
   FaUserPlus,
   FaImages,
+  FaWpforms,
+  FaSignature,
+
 } from "react-icons/fa";
 
 // Define the interface for the props expected by the Layout
@@ -44,10 +47,11 @@ export default function AuthenticatedLayout({
   const menu = [
     { name: "Dashboard", href: "/dashboard", icon: <FaHome /> },
     { name: "Jadwal Rapat", href: "/jadwal-rapat", icon: <FaCalendarAlt /> },
-    { name: "Daftar Tamu", href: "/daftar-tamu", icon: <FaUsers /> },
+    { name: "Daftar Tamu Plus", href: "/daftar-tamu-plus", icon: <FaUsers /> },
 
     ...(isAdmin ? [
       { name: "User Management", href: "/users_plus", icon: <FaUserPlus /> },
+
     ] : []),
 
     ...(canManageVideos ? [
@@ -146,8 +150,57 @@ export default function AuthenticatedLayout({
               >
                 Image Mode
               </button>
+
+
+
+
+
             </div>
           )}
+
+          <div className="flex bg-gray-100 p-1 rounded-lg">
+
+
+            <Link
+              href="/signatures-archive"
+              className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
+              title="Signature"
+            >
+              <FaSignature />
+
+            </Link>
+
+            <Link
+              href="/photos-archive"
+              className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
+              title="Photo"
+            >
+              <FaImages />
+
+            </Link>
+
+            <Link
+              href="/form-absen-rapat"
+              className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
+              title="Form Absen Rapat"
+            >
+              <FaUserPlus />
+
+            </Link>
+
+            <Link
+              href="/form-link-generator"
+              className="w-10 h-10 bg-[#B0DAFF] rounded-2xl flex items-center justify-center text-[#0B3D91] font-bold text-xl hover:bg-white transition"
+              title="Link Form Generator"
+            >
+              <FaWpforms />
+
+            </Link>
+
+
+          </div>
+
+
           <Dropdown>
             <Dropdown.Trigger>
               <button className="flex items-center text-blue-700 hover:text-gray-900 font-semibold">
@@ -167,11 +220,13 @@ export default function AuthenticatedLayout({
         </nav>
 
         {/* Header */}
-        {header && (
-          <header className="bg-white shadow-sm">
-            <div className="max-w-7xl mx-auto py-4 px-6">{header}</div>
-          </header>
-        )}
+        {
+          header && (
+            <header className="bg-white shadow-sm">
+              <div className="max-w-7xl mx-auto py-4 px-6">{header}</div>
+            </header>
+          )
+        }
 
         {/* Content area */}
         <main
@@ -184,25 +239,34 @@ export default function AuthenticatedLayout({
         >
           {children}
         </main>
-      </div>
+      </div >
 
       {/* ✅ BOTTOM NAV FOR MOBILE */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0B3D91] text-white flex justify-around py-3 rounded-t-2xl shadow-lg z-50">
-        {menu.map((item) => {
-          const isActive = url.startsWith(item.href);
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex flex-col items-center text-[10px] ${isActive ? "text-[#B0DAFF]" : "opacity-70"
-                }`}
-            >
-              <span className="text-lg">{item.icon}</span>
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
+      < nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0B3D91] text-white flex justify-around py-3 rounded-t-2xl shadow-lg z-50" >
+
+        {
+          menu.map((item) => {
+            const isActive = url.startsWith(item.href);
+            return (
+
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex flex-col items-center text-[10px] ${isActive ? "text-[#B0DAFF]" : "opacity-70"
+                  }`}
+              >
+                <span className="text-lg">{item.icon}</span>
+                {item.name}
+              </Link>
+
+            );
+          })
+        }
+
+
+
+
+      </nav >
+    </div >
   );
 }

@@ -4,18 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use App\Models\UserPlus;
 use App\Models\RoomMaster;
 
 class JadwalRapat extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'jadwal_rapats';
 
     protected $fillable = [
         'user_id',
+        'rapat_code',
         'tanggal',
         'jam_mulai',
         'jam_selesai',
@@ -68,6 +70,16 @@ class JadwalRapat extends Model
         return $this->belongsTo(RoomMaster::class, 'lokasi', 'room_code');
     }
 
+    public function lists()
+    {
+        return $this->hasMany(ListJadwalRapat::class, 'jadwal_rapat_id');
+    }
+
+    public function formLinks()
+    {
+        return $this->hasMany(FormLink::class, 'jadwal_rapat_id');
+    }
+
     /**
      * Slug otomatis setiap kali membuat jadwal baru.
      */
@@ -78,6 +90,13 @@ class JadwalRapat extends Model
         static::creating(function ($jadwal) {
             if (empty($jadwal->slug)) {
                 $jadwal->slug = Str::slug($jadwal->judul . '-' . now()->format('YmdHis'));
+            }
+
+            if (empty($jadwal->rapat_code)) {
+                do {
+                    $code = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+                } while (static::where('rapat_code', $code)->exists());
+                $jadwal->rapat_code = $code;
             }
         });
     }

@@ -19,10 +19,17 @@ class JadwalRapatController extends Controller
     {
         $status = $request->get('status', 'Belum');
 
-        $jadwalRapat = JadwalRapat::with('room')->when($status, function ($q) use ($status) {
-            $q->where('status', $status);
-        })
-            ->orderBy('tanggal', 'desc')
+        $query = JadwalRapat::with('room');
+
+        if ($status === 'Trashed') {
+            $query->onlyTrashed();
+        } else {
+            $query->when($status, function ($q) use ($status) {
+                $q->where('status', $status);
+            });
+        }
+
+        $jadwalRapat = $query->orderBy('tanggal', 'desc')
             ->orderBy('jam_mulai', 'asc')
             ->paginate(10)
             ->withQueryString();
@@ -211,7 +218,37 @@ class JadwalRapatController extends Controller
 
         $jadwalRapat->delete();
 
-        return back()->with('message', 'Jadwal rapat berhasil dihapus');
+        return back()->with('message', 'Jadwal rapat berhasil dipindahkan ke kotak sampah');
+    }
+
+    public function restore($id)
+    {
+        $jadwalRapat = JadwalRapat::withTrashed()->findOrFail($id);
+        $user = auth()->user();
+
+        // Check if the user is the owner or has the required role
+        if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak', 'pic'])) {
+            abort(403);
+        }
+
+        $jadwalRapat->restore();
+
+        return back()->with('message', 'Jadwal rapat berhasil dipulihkan');
+    }
+
+    public function forceDelete($id)
+    {
+        $jadwalRapat = JadwalRapat::withTrashed()->findOrFail($id);
+        $user = auth()->user();
+
+        // Check if the user is the owner or has the required role
+        if ($jadwalRapat->user_id !== $user->id && !in_array($user->role, ['admin', 'ula', 'kasubak', 'pic'])) {
+            abort(403);
+        }
+
+        $jadwalRapat->forceDelete();
+
+        return back()->with('message', 'Jadwal rapat berhasil dihapus secara permanen');
     }
 
     public function getBookedTimes(Request $request)

@@ -8,6 +8,8 @@ import {
     FaPlus,
     FaTrash,
     FaEdit,
+    FaUndo,
+    FaTimes,
 } from "react-icons/fa";
 import { GoChecklist } from "react-icons/go";
 import { ToastContainer, toast } from "react-toastify";
@@ -253,6 +255,28 @@ export default function Index() {
                 onError: () => toast.error("❌ Gagal mengubah status!"),
             }
         );
+    };
+
+    const handleRestore = (id: number) => {
+        router.post(`/jadwal-rapat/${id}/restore`, {}, {
+            onSuccess: () => {
+                toast.success("✅ Jadwal berhasil dipulihkan!");
+                router.reload({ only: ["jadwal"] });
+            },
+            onError: () => toast.error("❌ Gagal memulihkan jadwal!"),
+        });
+    };
+
+    const handleForceDelete = (id: number) => {
+        if (confirm("Apakah Anda yakin ingin menghapus jadwal ini secara permanen?")) {
+            router.delete(`/jadwal-rapat/${id}/force-delete`, {
+                onSuccess: () => {
+                    toast.success("🗑️ Jadwal dihapus secara permanen!");
+                    router.reload({ only: ["jadwal"] });
+                },
+                onError: () => toast.error("❌ Gagal menghapus jadwal!"),
+            });
+        }
     };
 
 
@@ -543,12 +567,12 @@ export default function Index() {
                 {/* ✅ Filter Section Responsive */}
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
                     <div className="flex gap-2 md:gap-4 overflow-x-auto">
-                        {["Belum", "Proses", "Selesai"].map((status) => (
+                        {["Belum", "Proses", "Selesai", "Trashed"].map((status) => (
                             <button
                                 key={status}
                                 onClick={() => {
                                     setFilter(
-                                        status as "Belum" | "Proses" | "Selesai"
+                                        status as "Belum" | "Proses" | "Selesai" | "Trashed"
                                     );
                                     router.get(
                                         `/jadwal-rapat?status=${status}&page=1`,
@@ -564,7 +588,7 @@ export default function Index() {
                                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                             >
-                                {status}
+                                {status === "Trashed" ? "Kotak Sampah" : status}
                             </button>
                         ))}
                     </div>
@@ -574,8 +598,8 @@ export default function Index() {
                         <button
                             onClick={handleToggleAutoApprove}
                             className={`font-medium px-3 md:px-4 py-2 text-sm md:text-base rounded-md flex items-center gap-2 shadow-md transition-all ${isAutoApprove
-                                    ? "bg-green-600 hover:bg-green-700 text-white ring-2 ring-green-300" // Active User State
-                                    : "bg-gray-200 hover:bg-gray-300 text-gray-700" // Inactive State
+                                ? "bg-green-600 hover:bg-green-700 text-white ring-2 ring-green-300" // Active User State
+                                : "bg-gray-200 hover:bg-gray-300 text-gray-700" // Inactive State
                                 }`}
                         >
                             <GoChecklist className={isAutoApprove ? "text-xl" : ""} />
@@ -910,31 +934,54 @@ export default function Index() {
                                     </td>
 
                                     <td className="px-4 py-2 text-center border border-gray-300 space-x-3">
-                                        {(canEditAnyJadwal || row.data.user_id === auth.user.id) && (
-                                            <button
-                                                onClick={() => handleEdit(row.data)}
-                                                className="text-yellow-500 hover:text-yellow-600"
-                                            >
-                                                <FaEdit />
-                                            </button>
-                                        )}
-                                        {(canEditAnyJadwal || row.data.user_id === auth.user.id) && (
-                                            <button
-                                                onClick={() => {
-                                                    if (confirm("Hapus jadwal ini?")) {
-                                                        router.delete(`/jadwal-rapat/${row.data.id}`, {
-                                                            onSuccess: () => {
-                                                                toast.success("🗑️ Jadwal dihapus");
-                                                                router.reload({ only: ["jadwal"] });
-                                                            },
-                                                            onError: () => toast.error("❌ Gagal menghapus"),
-                                                        });
-                                                    }
-                                                }}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <FaTrash />
-                                            </button>
+                                        {filter === "Trashed" ? (
+                                            <>
+                                                <button
+                                                    onClick={() => handleRestore(row.data.id)}
+                                                    className="text-blue-500 hover:text-blue-700"
+                                                    title="Restore"
+                                                >
+                                                    <FaUndo size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleForceDelete(row.data.id)}
+                                                    className="text-red-500 hover:text-red-700"
+                                                    title="Delete Permanently"
+                                                >
+                                                    <FaTimes size={18} />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                {(canEditAnyJadwal || row.data.user_id === auth.user.id) && (
+                                                    <button
+                                                        onClick={() => handleEdit(row.data)}
+                                                        className="text-yellow-500 hover:text-yellow-600"
+                                                        title="Edit"
+                                                    >
+                                                        <FaEdit />
+                                                    </button>
+                                                )}
+                                                {(canEditAnyJadwal || row.data.user_id === auth.user.id) && (
+                                                    <button
+                                                        onClick={() => {
+                                                            if (confirm("Pindahkan jadwal ini ke kotak sampah?")) {
+                                                                router.delete(`/jadwal-rapat/${row.data.id}`, {
+                                                                    onSuccess: () => {
+                                                                        toast.success("🗑️ Jadwal dipindahkan ke kotak sampah");
+                                                                        router.reload({ only: ["jadwal"] });
+                                                                    },
+                                                                    onError: () => toast.error("❌ Gagal menghapus"),
+                                                                });
+                                                            }
+                                                        }}
+                                                        className="text-red-500 hover:text-red-700"
+                                                        title="Delete"
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
+                                                )}
+                                            </>
                                         )}
                                     </td>
                                 </tr>

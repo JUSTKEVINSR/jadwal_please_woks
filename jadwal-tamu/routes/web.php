@@ -4,11 +4,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 
 use App\Http\Controllers\JadwalRapatController;
-use App\Http\Controllers\DaftarTamuController;
+
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\GambarController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FormAbsenRapatController;
+use App\Http\Controllers\FormSignatureController;
+use App\Http\Controllers\FormLinkGeneratorController;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -30,15 +33,34 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/jadwal-rapat/booked-times', [JadwalRapatController::class, 'getBookedTimes'])->name('jadwal-rapat.booked-times');
     Route::get('/jadwal-rapat/booked-dates', [JadwalRapatController::class, 'getBookedDates'])->name('jadwal-rapat.booked-dates');
     Route::post('/jadwal-rapat/toggle-auto-approve', [JadwalRapatController::class, 'toggleAutoApprove'])->name('jadwal-rapat.toggle-auto-approve');
+    Route::post('/jadwal-rapat/{id}/restore', [JadwalRapatController::class, 'restore'])->name('jadwal-rapat.restore');
+    Route::delete('/jadwal-rapat/{id}/force-delete', [JadwalRapatController::class, 'forceDelete'])->name('jadwal-rapat.force-delete');
+
+    // Form Absen Rapat
+    Route::get('/form-absen-rapat', [FormAbsenRapatController::class, 'index'])->name('form-absen-rapat.index');
+
+    // Form Link Generator
+    Route::get('/form-link-generator', [FormLinkGeneratorController::class, 'index'])->name('form-link-generator.index');
+    Route::post('/form-link-generator', [FormLinkGeneratorController::class, 'store'])->name('form-link-generator.store');
+    Route::put('/form-link-generator/{formLink}/toggle', [FormLinkGeneratorController::class, 'toggle'])->name('form-link-generator.toggle');
+    Route::delete('/form-link-generator/{formLink}', [FormLinkGeneratorController::class, 'destroy'])->name('form-link-generator.destroy');
 });
-// CRUD Daftar Tamu
-// Route::resource('daftar-tamu', DaftarTamuController::class)->middleware(['auth']);
-// ✅ Daftar Tamu - PERBAIKAN ROUTE
+Route::post('/form-absen-rapat', [FormAbsenRapatController::class, 'store'])->name('form-absen-rapat.store');
+
+// Form Signature endpoint (accessible for signatures)
+Route::post('/form-signatures', [FormSignatureController::class, 'store'])->name('form-signatures.store');
+Route::get('/signatures-archive', [FormSignatureController::class, 'index'])->name('form-signatures.index')->middleware(['auth']);
+Route::delete('/form-signatures/{formSignature}', [FormSignatureController::class, 'destroy'])->name('form-signatures.destroy')->middleware(['auth']);
+
+// Form Photo endpoints
+Route::post('/form-photos', [\App\Http\Controllers\FormPhotoController::class, 'store'])->name('form-photos.store');
+Route::get('/photos-archive', [\App\Http\Controllers\FormPhotoController::class, 'index'])->name('form-photos.index')->middleware(['auth']);
+Route::delete('/form-photos/{formPhoto}', [\App\Http\Controllers\FormPhotoController::class, 'destroy'])->name('form-photos.destroy')->middleware(['auth']);
+
+
+
 Route::middleware(['auth'])->group(function () {
-    Route::get('/daftar-tamu', [DaftarTamuController::class, 'index'])->name('daftar-tamu.index');
-    Route::post('/daftar-tamu', [DaftarTamuController::class, 'store'])->name('daftar-tamu.store');
-    Route::put('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'update'])->name('daftar-tamu.update');
-    Route::delete('/daftar-tamu/{daftarTamu}', [DaftarTamuController::class, 'destroy'])->name('daftar-tamu.destroy');
+    Route::get('/daftar-tamu-plus', [\App\Http\Controllers\DaftarTamuPlusController::class, 'index'])->name('daftar-tamu-plus.index');
 });
 // CRUD Manajemen Video
 // ✅ MANUAL DEFINE CRUD VIDEO (mencegah bentrok)

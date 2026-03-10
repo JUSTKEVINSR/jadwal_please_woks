@@ -12,7 +12,7 @@ class RoomMasterSeeder extends Seeder
      */
     public function run(): void
     {
-        \DB::table('room_master')->insert([
+        \DB::table('room_master')->upsert([
             [
                 'name' => 'Ruang Rapat A',
                 'room_code' => 1,
@@ -37,6 +37,6 @@ class RoomMasterSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ], ['room_code'], ['name', 'updated_at']);
     }
 }
