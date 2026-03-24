@@ -28,7 +28,7 @@ export default function Index() {
 
     useEffect(() => {
         if (auth.user.role !== 'admin' && auth.user.role !== 'ula' && auth.user.role !== 'pic') {
-            router.visit('/dashboard');
+            router.visit('/');
         }
     }, [auth.user.role]);
 

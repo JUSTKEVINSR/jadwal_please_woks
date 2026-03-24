@@ -53,7 +53,7 @@ const Create: React.FC<NewUserFormProps> = (props: NewUserFormProps) => {
 
     useEffect(() => {
         if (auth.user.role !== 'admin' && auth.user.role !== 'pic') {
-            router.visit('/dashboard');
+            router.visit('/');
         }
     }, [auth.user.role]);
     const [showModal, setShowModal] = useState(false);

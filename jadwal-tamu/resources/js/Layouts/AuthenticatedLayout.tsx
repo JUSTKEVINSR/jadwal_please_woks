@@ -45,7 +45,7 @@ export default function AuthenticatedLayout({
   const canManageVideos = isAdmin || isUla;
 
   const menu = [
-    { name: "Dashboard", href: "/dashboard", icon: <FaHome /> },
+    { name: "Dashboard", href: "/", icon: <FaHome /> },
     { name: "Jadwal Rapat", href: "/jadwal-rapat", icon: <FaCalendarAlt /> },
     { name: "Daftar Tamu Plus", href: "/daftar-tamu-plus", icon: <FaUsers /> },
 
@@ -55,7 +55,7 @@ export default function AuthenticatedLayout({
     ] : []),
 
     ...(canManageVideos ? [
-      { name: "TV Mode", href: "/", icon: <FaTv /> },
+      { name: "TV Mode", href: "/tvmode", icon: <FaTv /> },
       { name: "Manajemen Video", href: "/manajemen-video", icon: <FaVideo /> },
       { name: "Manajemen Gambar", href: "/manajemen-gambar", icon: <FaImages /> },
     ] : []),
@@ -112,6 +112,7 @@ export default function AuthenticatedLayout({
                 {/* ✅ Tooltip ala Discord (slide + fade + triangle) */}
                 <span
                   className="
+                    pointer-events-none
                     absolute left-[60px] top-1/2 -translate-y-1/2
                     bg-white text-[#0B3D91] font-semibold text-[11px]
                     py-1.5 px-3 rounded-xl shadow-lg whitespace-nowrap
@@ -246,7 +247,7 @@ export default function AuthenticatedLayout({
 
         {
           menu.map((item) => {
-            const isActive = url.startsWith(item.href);
+            const isActive = item.href === '/' ? url === '/' : url.startsWith(item.href);
             return (
 
               <Link

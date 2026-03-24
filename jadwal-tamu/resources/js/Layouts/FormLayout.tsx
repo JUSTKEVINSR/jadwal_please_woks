@@ -10,13 +10,15 @@ export default function Guest({ children }: PropsWithChildren) {
                 <div>
                     <Link href="/">
 
+                        <div className="tenor-gif-embed" data-postid="11906233869012621764" data-share-method="host" data-aspect-ratio="0.903614" data-width="100%"><a href="https://tenor.com/view/owowowo-round-cute-gif-11906233869012621764">Owowowo Round Sticker</a>from <a href="https://tenor.com/search/owowowo-stickers">Owowowo Stickers</a>
+                        </div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+
                         <img
                             src="/images/Logo Itjen Hebat-01.png"
                             alt="Logo"
                             className="h-20 w-20 object-contain drop-shadow-lg"
                         />
 
-                        <ApplicationLogo className="h-20 w-20 fill-current text-gray-500" />
 
                     </Link>
                 </div>

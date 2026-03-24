@@ -19,9 +19,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // ✅ Halaman utama menampilkan jadwal & video
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/tvmode', [HomeController::class, 'index'])->name('home');
 // Dashboard
-Route::get('/dashboard', [DashboardController::class, 'index'])
+Route::get('/', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 // CRUD Jadwal Rapat
@@ -118,7 +118,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/users_plus/{userPlus}', [UserController::class, 'destroyPlus'])->name('users_plus.destroy');
 
     // If you need other admin routes that are NOT part of the standard resource, add them here:
-    // Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    // Route::get('/admin/', [AdminController::class, 'index'])->name('admin.dashboard');
 
 });
 

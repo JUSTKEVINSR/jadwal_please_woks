@@ -209,12 +209,18 @@ export default function Index({ jadwalRapats, initialTujuan = "", initialPhotoRe
             <FormLayout>
                 <Head title="Form Closed" />
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-                    <svg className="w-24 h-24 text-red-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+
+                    {/* <svg className="w-24 h-24 text-red-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Form Closed</h1>
+                    </svg> */}
+
+                    <div className="tenor-gif-embed" data-postid="25172881" data-share-method="host" data-aspect-ratio="1.39738" data-width="100%"><a href="https://tenor.com/view/minecraft-boat-smol-ame-gura-gif-25172881">Minecraft Boat GIF</a>from <a href="https://tenor.com/search/minecraft-gifs">Minecraft GIFs</a>
+                    </div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Oh Nyo the fowm is awweady cwosed</h1>
                     <p className="text-lg text-gray-600 max-w-lg">
-                        This form is tidak avalible, Please Hubungi Admin
+                        We awe so sowwy-worry, but we can't take any mowe entries wight now!! The fowm is stuffed full like a fluffy mawshmallow!! nuzzles uw hand aggwessively XP RAWR!! 🦖
+                        Dun be sad, k? Just wait fow next time!! glitchesw-w-w
+                        NYA~ ICHI NI SAN... BYE BYE!! XD ✌️🌈💕
                     </p>
                 </div>
             </FormLayout>

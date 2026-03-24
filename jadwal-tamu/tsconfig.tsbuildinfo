@@ -198,7 +198,7 @@
         "./node_modules/react-icons/fa/index.d.ts",
         "./resources/js/Layouts/AuthenticatedLayout.tsx",
         "./resources/js/Layouts/FormLayout.tsx",
-        "./resources/js/Pages/Dashboard.tsx",
+        "./resources/js/Pages/.tsx",
         "./resources/js/Pages/Home.tsx",
         "./resources/js/Pages/Welcome.tsx",
         "./resources/js/Pages/Auth/ConfirmPassword.tsx",

@@ -29,7 +29,6 @@ export default function Index({ auth, photos }: Readonly<Props>) {
 
     return (
         <AuthenticatedLayout
-            user={auth.user}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Photo Archive</h2>}
         >
             <Head title="Photo Archive" />

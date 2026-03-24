@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum')->get('/user', fn(Request $request) => $request
 Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard API
-    Route::get('/dashboard', [DashboardApiController::class, 'index']);
+    Route::get('/', [DashboardApiController::class, 'index']);
 
     // JADWAL RAPAT
     Route::get('/jadwal', [JadwalRapatApiController::class, 'index']);
