@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaFileExcel } from "react-icons/fa";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import * as XLSX from "xlsx";
 import { Head, usePage } from "@inertiajs/react";
 
 interface DaftarTamuPlus {
@@ -52,6 +53,32 @@ export default function Index() {
 
   const MAX_ROWS = 7;
   const totalPages = Math.ceil((daftarTamuPluses?.length || 0) / MAX_ROWS);
+
+  const exportToExcel = () => {
+    if (!daftarTamuPluses || daftarTamuPluses.length === 0) {
+      alert("Tidak ada data untuk diexport!");
+      return;
+    }
+
+    const dataToExport = daftarTamuPluses.map((item, index) => ({
+      No: index + 1,
+      Nama: item.nama,
+      Instansi: item.instansi || "-",
+      Jabatan: item.jabatan || "-",
+      "Tujuan (Rapat)": item.tujuan_judul || item.tujuan,
+      "Tanggal Kunjungan": formatDateIndo(item.tanggal_kunjungan),
+      "Jam Mulai": formatTime(item.jam_mulai),
+      "Jam Selesai": formatTime(item.jam_selesai),
+      "Signature Code": item.signature_code || "N/A",
+      "Photo Code": item.photo_code || "N/A",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Daftar Tamu");
+
+    XLSX.writeFile(workbook, "Daftar_Tamu_logs_.xlsx");
+  };
   const [page, setPage] = useState(1);
 
   const start = (page - 1) * MAX_ROWS;
@@ -70,6 +97,14 @@ export default function Index() {
       <Head title="Daftar Tamu Plus" />
 
       <div className="bg-[#B0DAFF] p-7 rounded-2xl shadow-md border border-[#7FB8E5] m-6">
+        <div className="flex justify-end">
+          <button
+            onClick={exportToExcel}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-sm transition"
+          >
+            <FaFileExcel className="text-lg" /> Export to Excel
+          </button>
+        </div>
         <div className="bg-white overflow-x-auto rounded-lg border border-gray-200 shadow-sm mt-4">
           <table className="min-w-full text-xs md:text-sm text-gray-700 border border-gray-300 border-collapse">
             <thead className="bg-[#0B3D91] text-white">
