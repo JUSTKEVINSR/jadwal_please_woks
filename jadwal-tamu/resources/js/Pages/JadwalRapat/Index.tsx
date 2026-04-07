@@ -10,10 +10,12 @@ import {
     FaEdit,
     FaUndo,
     FaTimes,
+    FaFileExcel,
 } from "react-icons/fa";
 import { GoChecklist } from "react-icons/go";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import * as XLSX from "xlsx";
 import { router, usePage } from "@inertiajs/react";
 import CircularDatePicker from "@/Components/CircularDatePicker";
 
@@ -553,6 +555,34 @@ export default function Index() {
         setUlaDropdown(null);
     };
 
+    const exportToExcel = () => {
+        if (!jadwal.data || jadwal.data.length === 0) {
+            toast.warn("Tidak ada data jadwal untuk diexport!");
+            return;
+        }
+
+        const dataToExport = jadwal.data.map((item: any, index: number) => ({
+            No: index + 1,
+            Tanggal: formatDateIndo(item.tanggal),
+            Pukul: `${formatTime(item.jam_mulai)} – ${formatTime(item.jam_selesai)}`,
+            Judul: item.judul,
+            Keterangan: item.keterangan || "-",
+            Lokasi: item.room?.name || "Unknown",
+            "Gunakan Zoom": item.gunakan_zoom === 'yes' ? 'Ya' : 'Tidak',
+            "Nama PIC": item.nama_pic || "-",
+            "Nomor PIC": item.nomor_pic || "-",
+            Kasubag: item.kasubak,
+            ULA: item.ula,
+            Status: item.status,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Jadwal Rapat");
+
+        XLSX.writeFile(workbook, "Jadwal_Rapat_logs_.xlsx");
+    };
+
     return (
         <AuthenticatedLayout
             header={
@@ -607,12 +637,20 @@ export default function Index() {
                         </button>
                     )}
 
-                    <button
-                        onClick={handleAdd}
-                        className="bg-[#0B3D91] hover:bg-[#001f45] text-white font-medium px-3 md:px-4 py-2 text-sm md:text-base rounded-md flex items-center gap-2 shadow-md"
-                    >
-                        <FaPlus /> Tambah Jadwal
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={exportToExcel}
+                            className="bg-green-600 hover:bg-green-700 text-white font-medium px-3 md:px-4 py-2 text-sm md:text-base rounded-md flex items-center gap-2 shadow-md transition"
+                        >
+                            <FaFileExcel className="text-lg" /> Export
+                        </button>
+                        <button
+                            onClick={handleAdd}
+                            className="bg-[#0B3D91] hover:bg-[#001f45] text-white font-medium px-3 md:px-4 py-2 text-sm md:text-base rounded-md flex items-center gap-2 shadow-md"
+                        >
+                            <FaPlus /> Tambah Jadwal
+                        </button>
+                    </div>
                 </div>
 
                 {/* ✅ TABLE RESPONSIVE */}

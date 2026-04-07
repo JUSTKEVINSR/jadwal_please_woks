@@ -1,6 +1,6 @@
 import React from "react";
 import FormLayout from "@/Layouts/FormLayout";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, useForm, Link } from "@inertiajs/react";
 
 interface JadwalRapat {
     id: number;
@@ -37,6 +37,7 @@ export default function Index({ jadwalRapats, initialTujuan = "", initialPhotoRe
     const [isDrawing, setIsDrawing] = React.useState(false);
     const [selectedPhoto, setSelectedPhoto] = React.useState<File | null>(null);
     const [photoPreviewUrl, setPhotoPreviewUrl] = React.useState<string | null>(null);
+    const [isSubmitted, setIsSubmitted] = React.useState(false);
 
     React.useEffect(() => {
         // Only run canvas logic if the form is not closed
@@ -194,8 +195,7 @@ export default function Index({ jadwalRapats, initialTujuan = "", initialPhotoRe
         };
 
         window.axios.post('/form-absen-rapat', submitData).then(() => {
-            alert('Form Berhasil Disimpan!');
-            window.location.href = '/';
+            setIsSubmitted(true);
         }).catch(err => {
             console.error(err.response?.data?.errors || err);
             const errorData = err.response?.data?.errors;
@@ -222,6 +222,48 @@ export default function Index({ jadwalRapats, initialTujuan = "", initialPhotoRe
                         Dun be sad, k? Just wait fow next time!! glitchesw-w-w
                         NYA~ ICHI NI SAN... BYE BYE!! XD ✌️🌈💕
                     </p>
+                    <div className="flex justify-end">
+                        <button
+                            //onClick={exportToExcel}
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-sm transition"
+                        >
+                            close
+                        </button>
+                    </div>
+                </div>
+            </FormLayout>
+        );
+    }
+
+    if (isSubmitted) {
+        return (
+            <FormLayout>
+                <Head title="Form Berhasil" />
+                <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
+
+
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2 mt-4">yippieeee thannkiee</h1>
+                    <p className="text-lg text-gray-600 max-w-lg mb-6">
+
+                        OMW (Oh My Waww!!) Thank u so, so, SO much fow fiwwing out the fowm!! 🌈✨ Youw answers are so pwecious, we’re gonna keep dem safe in a wittwe box wike a shiny tweasure!! nuzzles u
+
+                        NYA~!! XD
+                        We weally appweciate u taking the time to help us out!!
+                        pounces on u with huggies 💖
+
+                        Stay kawaii, stay epic!! RAWR!! 🦖✨
+
+                    </p>
+                    <div className="flex justify-center">
+                        <Link
+                            href={route('logout')}
+                            method="post"
+                            as="button"
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2 shadow-sm transition"
+                        >
+                            Log Out & Close
+                        </Link>
+                    </div>
                 </div>
             </FormLayout>
         );

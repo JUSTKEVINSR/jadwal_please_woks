@@ -36,15 +36,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/jadwal-rapat/{id}/restore', [JadwalRapatController::class, 'restore'])->name('jadwal-rapat.restore');
     Route::delete('/jadwal-rapat/{id}/force-delete', [JadwalRapatController::class, 'forceDelete'])->name('jadwal-rapat.force-delete');
 
-    // Form Absen Rapat
-    Route::get('/form-absen-rapat', [FormAbsenRapatController::class, 'index'])->name('form-absen-rapat.index');
-
     // Form Link Generator
     Route::get('/form-link-generator', [FormLinkGeneratorController::class, 'index'])->name('form-link-generator.index');
     Route::post('/form-link-generator', [FormLinkGeneratorController::class, 'store'])->name('form-link-generator.store');
     Route::put('/form-link-generator/{formLink}/toggle', [FormLinkGeneratorController::class, 'toggle'])->name('form-link-generator.toggle');
     Route::delete('/form-link-generator/{formLink}', [FormLinkGeneratorController::class, 'destroy'])->name('form-link-generator.destroy');
 });
+
+// Form Absen Rapat (Public accessible via Link)
+Route::get('/form-absen-rapat', [FormAbsenRapatController::class, 'index'])->name('form-absen-rapat.index');
 Route::post('/form-absen-rapat', [FormAbsenRapatController::class, 'store'])->name('form-absen-rapat.store');
 
 // Form Signature endpoint (accessible for signatures)

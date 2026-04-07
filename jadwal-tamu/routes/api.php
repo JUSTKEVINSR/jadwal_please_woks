@@ -63,10 +63,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/jadwal/available-slots', [JadwalRapatApiController::class, 'availableSlots']);
 
     // DAFTAR TAMU
-    Route::get('/tamu', [DaftarTamuApiController::class, 'index']);
-    Route::post('/tamu', [DaftarTamuApiController::class, 'store']);
-    Route::put('/tamu/{tamu}', [DaftarTamuApiController::class, 'update']);
-    Route::delete('/tamu/{tamu}', [DaftarTamuApiController::class, 'destroy']);
+    Route::get('/tamu', [App\Http\Controllers\Api\FormAbsenRapatApiController::class, 'index']);
+    Route::post('/tamu', [App\Http\Controllers\Api\FormAbsenRapatApiController::class, 'store']);
+    Route::put('/tamu/{tamu}', [App\Http\Controllers\Api\FormAbsenRapatApiController::class, 'update']);
+    Route::delete('/tamu/{tamu}', [App\Http\Controllers\Api\FormAbsenRapatApiController::class, 'destroy']);
 
     // VIDEO MANAGEMENT
     Route::get('/videos', [VideoApiController::class, 'index']);
