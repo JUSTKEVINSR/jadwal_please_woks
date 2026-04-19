@@ -675,14 +675,17 @@ export default function Index() {
                                 </th>
 
                                 <th className="w-24 px-1 md:px-2 py-2 border">
-                                    Gunakan Zoom
+                                    Zoom
                                 </th>
+
+                                {/* 
                                 <th className="px-1 md:px-2 py-2 border">
                                     Nama PIC
                                 </th>
                                 <th className="px-1 md:px-2 py-2 border">
                                     Nomor PIC
                                 </th>
+                                */}
 
                                 <th className="px-1 md:px-2 py-2 border">
                                     Kasubag
@@ -747,7 +750,7 @@ export default function Index() {
                                     <td className="px-1 py-2 border border-gray-300">
                                         {row.data.gunakan_zoom === 'yes' ? 'Ya' : 'Tidak'}
                                     </td>
-
+                                    {/* 
                                     <td className="px-1 py-2 border border-gray-300">
                                         {row.data.nama_pic || "-"}
                                     </td>
@@ -755,7 +758,7 @@ export default function Index() {
                                     <td className="px-1 py-2 border border-gray-300">
                                         {row.data.nomor_pic || "-"}
                                     </td>
-
+                                    */}
                                     <td className="px-1 py-2 text-center border border-gray-300 relative">
                                         <button
                                             onClick={(e) => {
@@ -1244,88 +1247,8 @@ export default function Index() {
                                     />
                                 </div>
 
-                                {/* lokasi 
-                                <div className="col-span-3">
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Lokasi
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={form.lokasi}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                lokasi: e.target.value,
-                                            })
-                                        }
-                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
-                                        placeholder="Masukkan lokasi rapat"
-                                    />
-                                </div>
-                                */}
 
-                                {/* Lokasi Select Dropdown 
-                                <div className="col-span-2">
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi</label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
-                                        value={form.lokasi}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                lokasi: parseInt(e.target.value),
-                                            })
-                                        }
-                                        required
-                                    >
-                                        {rooms.map((room: any) => (
-                                            <option key={room.room_code} value={room.room_code}>
-                                                {room.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>*/}
-
-                                {/* Zoom Select Dropdown 
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Gunakan Zoom</label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
-                                        value={form.gunakan_zoom}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                gunakan_zoom: e.target.value as "yes" | "no",
-                                            })
-                                        }
-                                        required
-                                    >
-                                        <option value="yes">Ya</option>
-                                        <option value="no">Tidak</option>
-                                    </select>
-                                </div>*/}
-
-                                {/* Kasubak Select Dropdown 
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Kasubak</label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
-                                        value={form.kasubak}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                kasubak: e.target.value as "pending" | "rejected" | "approve",
-                                            })
-                                        }
-                                        required
-                                    >
-                                        <option value="pending">Pending</option>
-                                        <option value="rejected">Rejected</option>
-                                        <option value="approve">Approve</option>
-                                    </select>
-                                </div>*/}
-
-                                {/* Nama PIC */}
+                                {/* Nama PIC 
                                 <div className="col-span-3">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                                         Nama PIC
@@ -1342,9 +1265,9 @@ export default function Index() {
                                         className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
                                         placeholder="Nama PIC"
                                     />
-                                </div>
+                                </div>*/}
 
-                                {/* Nomor PIC */}
+                                {/* Nomor PIC 
                                 <div className="col-span-1">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                                         Nomor PIC
@@ -1361,7 +1284,7 @@ export default function Index() {
                                         className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0B3D91]/50 text-gray-800"
                                         placeholder="Nomor PIC"
                                     />
-                                </div>
+                                </div>*/}
 
                                 {/* Zoom Select Dropdown */}
                                 <div className="col-span-1">

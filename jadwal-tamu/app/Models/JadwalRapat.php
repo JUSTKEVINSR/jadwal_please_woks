@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use App\Models\UserPlus;
-use App\Models\RoomMaster;
 
 class JadwalRapat extends Model
 {
@@ -68,11 +66,6 @@ class JadwalRapat extends Model
     public function room()
     {
         return $this->belongsTo(RoomMaster::class, 'lokasi', 'room_code');
-    }
-
-    public function lists()
-    {
-        return $this->hasMany(ListJadwalRapat::class, 'jadwal_rapat_id');
     }
 
     public function formLinks()
